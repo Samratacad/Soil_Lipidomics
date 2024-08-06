@@ -1,0 +1,3 @@
+*.qmd linguist-language=Markdown
+[linguist]
+    language = "Quarto"
