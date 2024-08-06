@@ -1,0 +1,200 @@
+---
+title: "Figure3"
+format: html
+editor: visual
+---
+
+## Figure 3
+
+Hierarchical clustering heatmap of FDR-Significant lipid compounds
+
+## Load necessary libraries
+
+```{r}
+
+library(readxl)
+library(tidyr)
+library(dplyr)
+library(broom)
+library(stats)  # For p.adjust function
+library(ComplexHeatmap) # Create the heatmap
+
+# Load the data
+compounds_df <- read_excel("Figure2.xlsx", sheet = "compounds")
+metadata_df <- read_excel("Figure2.xlsx", sheet = "metadata")
+
+# Melt the compounds data for merging
+compounds_melted_df <- compounds_df %>%
+  gather(key = "Sample", value = "Measurement", -GlobalID, -`Molecule List`, -Molecule, -`Precursor Mz`, -`Mean Best Retention Time`, -PrecursorMass)
+
+# Convert Sample to numeric for proper merging
+compounds_melted_df$Sample <- as.numeric(compounds_melted_df$Sample)
+
+# Merge with metadata
+combined_df <- merge(compounds_melted_df, metadata_df, by.x = "Sample", by.y = "Sample")
+
+# Create a new column for the treatment groups
+combined_df$Treatment <- paste(combined_df$Type1, combined_df$Type2, sep = "_")
+
+# Perform ANOVA for each compound
+anova_results <- combined_df %>%
+  group_by(GlobalID, `Molecule List`) %>%
+  do(tidy(aov(Measurement ~ Type1 * Type2, data = .))) %>%
+  ungroup()
+
+# Filter significant results with p-value < 0.05 for the main effects and interaction
+significant_results_type1 <- anova_results %>%
+  filter(term == "Type1" & p.value < 0.05)
+
+significant_results_type2 <- anova_results %>%
+  filter(term == "Type2" & p.value < 0.05)
+
+significant_results_interaction <- anova_results %>%
+  filter(term == "Type1:Type2" & p.value < 0.05)
+
+# Combine significant results
+significant_results <- bind_rows(significant_results_type1, significant_results_type2, significant_results_interaction)
+
+# Extract significant compounds
+significant_compounds <- unique(significant_results$GlobalID)
+
+# Filter the combined data to include only the significant compounds
+significant_data <- combined_df %>%
+  filter(GlobalID %in% significant_compounds)
+
+# Generate separate heatmaps for each significant Molecule List class
+significant_molecule_lists <- unique(significant_data$`Molecule List`)
+```
+
+## Function to perform FDR adjustment for a *single Molecule List*
+
+```{r}
+
+perform_fdr <- function(data) {
+  data %>%
+    mutate(
+      fdr_adjusted_p = p.adjust(p.value, method = "BH"),
+      significant = fdr_adjusted_p < 0.05
+    )
+}
+
+# Perform FDR adjustment for each Molecule List separately
+fdr_results <- anova_results %>%
+  group_by(`Molecule List`) %>%
+  group_modify(~perform_fdr(.x)) %>%
+  ungroup()
+
+
+# Filter for significant compounds after FDR correction
+significant_compounds_fdr <- fdr_results %>%
+  filter(significant == TRUE) %>%
+  select(GlobalID, `Molecule List`, term) %>%
+  distinct()
+
+# Determine the effect for each significant compound
+compound_effects_fdr <- significant_compounds_fdr %>%
+  group_by(GlobalID) %>%
+  summarise(
+    Effect = case_when(
+      any(term == "Type1") ~ "Climate",
+      any(term == "Type2") ~ "Water",
+      any(term == "Type1:Type2") ~ "Interaction",
+      TRUE ~ "Unknown"
+    )
+  )
+
+# Filter the combined data to include only the significant compounds after FDR
+significant_data_fdr <- combined_df %>%
+  filter(GlobalID %in% significant_compounds_fdr$GlobalID)
+
+```
+
+## Create a pivot table for the heatmap
+
+```{r}
+
+heatmap_data_fdr <- significant_data_fdr %>%
+  group_by(GlobalID, Molecule, `Molecule List`, Treatment) %>%
+  summarise(Measurement = mean(Measurement, na.rm = TRUE), .groups = "drop") %>%
+  pivot_wider(names_from = Treatment, values_from = Measurement) %>%
+  left_join(compound_effects_fdr, by = "GlobalID")
+
+# Prepare the matrix for heatmap
+heatmap_data_fdr <- heatmap_data_fdr %>%
+  mutate(RowLabel = paste(Molecule, " (", GlobalID, ")", ", ", `Molecule List`, sep = ""))
+
+rownames(heatmap_data_fdr) <- heatmap_data_fdr$RowLabel
+
+# Prepare the matrix for heatmap
+heatmap_matrix_fdr <- as.matrix(heatmap_data_fdr[, c("Future_Drought", "Ambient_Drought", "Ambient_No_drought", "Future_No_drought")])
+heatmap_matrix_fdr <- t(scale(t(heatmap_matrix_fdr), center = TRUE, scale = TRUE))
+
+# Create the significance type annotation
+significance_type_fdr <- factor(heatmap_data_fdr$Effect, 
+                                levels = c("Climate", "Water", "Interaction"))
+
+# Create the treatment annotations
+water_condition <- factor(c("Drought", "Drought", "No_drought", "No_drought"), 
+                          levels = c("No_drought", "Drought"))
+climate_condition <- factor(c("Future", "Ambient", "Ambient", "Future"), 
+                            levels = c("Ambient", "Future"))
+
+
+
+ht_fdr <- Heatmap(heatmap_matrix_fdr,
+                  name = "Z-score",
+                  cluster_rows = TRUE,
+                  cluster_columns = TRUE,
+                  show_row_names = FALSE,
+                  column_names_rot = 45,
+                  column_names_gp = gpar(fontsize = 8),  # Reduced column name font size
+                  row_names_gp = gpar(fontsize = 9),     # Reduced row name font size
+                  width = unit(6, "inches"),             # Set a fixed width for the heatmap
+                  height = unit(8, "inches"),            # Set a fixed height for the heatmap
+                  top_annotation = HeatmapAnnotation(
+                    Water = water_condition,
+                    Climate = climate_condition,
+                    col = list(
+                      Water = c("No_drought" = "lightblue", "Drought" = "pink"),
+                      Climate = c("Ambient" = "lightgreen", "Future" = "orange")
+                    ),
+                    annotation_legend_param = list(
+                      Water = list(title_gp = gpar(fontsize = 14), labels_gp = gpar(fontsize = 12)),
+                      Climate = list(title_gp = gpar(fontsize = 14), labels_gp = gpar(fontsize = 12))
+                    )
+                  ),
+                  left_annotation = rowAnnotation(
+                    SignificanceType = significance_type_fdr,
+                    col = list(
+                      SignificanceType = c("Climate" = "red", "Water" = "blue", "Interaction" = "green")
+                    ),
+                    annotation_legend_param = list(
+                      SignificanceType = list(title_gp = gpar(fontsize = 14), labels_gp = gpar(fontsize = 12))
+                    )
+                  ),
+                  right_annotation = rowAnnotation(
+                    Molecule = anno_text(heatmap_data_fdr$RowLabel, 
+                                         gp = gpar(fontsize = 6),
+                                         just = "left")
+                  ),
+                  column_title = "Hierarchical Clustering Heatmap of FDR-Significant Compounds",
+                  column_title_gp = gpar(fontsize = 16),  # Increased title font size
+                  heatmap_legend_param = list(
+                    title_gp = gpar(fontsize = 14),
+                    labels_gp = gpar(fontsize = 12),
+                    legend_direction = "horizontal",
+                    legend_width = unit(4, "inches")  # Set a fixed width for the legend
+                  )
+)
+
+# Save the plot
+pdf("complex_heatmap_fdr_significant_compounds_with_names.pdf", width = 12, height = 14)  # Adjusted overall dimensions
+draw(ht_fdr, 
+     annotation_legend_side = "bottom", 
+     heatmap_legend_side = "bottom",
+     merge_legend = TRUE,
+     padding = unit(c(2, 2, 10, 2), "cm"))  # Add padding, especially at the bottom for legends
+dev.off()
+
+print("FDR-corrected heatmap with compound names and bottom legends has been saved as 'complex_heatmap_fdr_significant_compounds_with_names.pdf'")
+```
