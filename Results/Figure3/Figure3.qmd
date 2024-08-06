@@ -20,8 +20,8 @@ library(stats)  # For p.adjust function
 library(ComplexHeatmap) # Create the heatmap
 
 # Load the data
-compounds_df <- read_excel("Figure2.xlsx", sheet = "compounds")
-metadata_df <- read_excel("Figure2.xlsx", sheet = "metadata")
+compounds_df <- read_excel("Figure3.xlsx", sheet = "compounds")
+metadata_df <- read_excel("Figure3.xlsx", sheet = "metadata")
 
 # Melt the compounds data for merging
 compounds_melted_df <- compounds_df %>%
