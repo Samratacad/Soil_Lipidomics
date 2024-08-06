@@ -1,0 +1,250 @@
+---
+title: "supplementary2"
+format: html
+editor: visual
+---
+
+## Perform 2-way-anova
+
+## Load Normalized data and metadata
+
+```{r}
+# Load necessary libraries
+library(tidyverse)
+library(car)
+library(tidyverse)
+library(pheatmap)
+library(RColorBrewer)
+
+# Read in the metadata and normalized data
+metadata <- read.csv("Metadata.csv")
+normalized_data <- read.csv("normalized_data.csv")
+
+# Convert Sample to character in metadata
+metadata$Sample <- as.character(metadata$Sample)
+
+# Create Treatment column in metadata
+metadata <- metadata %>%
+  mutate(Treatment = paste(Type1, Type2, sep = "_"))
+
+# Reshape normalized_data from wide to long format
+melted_normalized_data <- normalized_data %>%
+  pivot_longer(cols = -GlobalID, names_to = "Sample", values_to = "Value")
+
+# Remove the "X" prefix from the Sample column in melted_normalized_data
+melted_normalized_data$Sample <- str_replace(melted_normalized_data$Sample, "^X", "")
+
+# Ensure Sample column in metadata is character
+metadata$Sample <- as.character(metadata$Sample)
+
+# Check if there are any mismatches in sample identifiers
+cat("Mismatches in metadata not in melted_normalized_data:", setdiff(metadata$Sample, melted_normalized_data$Sample), "\n")
+cat("Mismatches in melted_normalized_data not in metadata:", setdiff(melted_normalized_data$Sample, metadata$Sample), "\n")
+
+# Merge melted data with metadata to get Treatment information
+merged_data <- merge(melted_normalized_data, metadata[, c("Sample", "Treatment")], by = "Sample")
+
+# If merged_data is empty, print a message and stop execution
+if (nrow(merged_data) == 0) {
+  stop("Merged data is empty. Check for mismatches in sample identifiers between metadata and normalized data.")
+}
+
+# Split Treatment into two factors: Climate and Water
+merged_data <- merged_data %>%
+  separate(Treatment, into = c("Climate", "Water"), sep = "_")
+
+# Initialize an empty list to store ANOVA results
+anova_results <- list()
+
+# Perform two-way ANOVA for each compound (GlobalID)
+for (global_id in unique(merged_data$GlobalID)) {
+  subset <- merged_data %>% filter(GlobalID == global_id)
+  
+  # Check if there are at least two levels for each factor
+  if (length(unique(subset$Climate)) > 1 & length(unique(subset$Water)) > 1) {
+    model <- aov(Value ~ Climate * Water, data = subset)
+    anova_table <- Anova(model, type = 2)
+    anova_table_df <- as.data.frame(anova_table)
+    anova_table_df$GlobalID <- global_id
+    anova_table_df$Term <- rownames(anova_table_df)
+    anova_results[[length(anova_results) + 1]] <- anova_table_df
+  }
+}
+
+# Combine results into a single data frame
+anova_results_df <- bind_rows(anova_results)
+
+
+```
+
+# Find number of significant compounds for each effect
+
+```{r}
+
+significance_level <- 0.05
+significant_climate <- anova_results_df %>%
+  filter(Term == "Climate" & `Pr(>F)` < significance_level) %>%
+  pull(GlobalID) %>%
+  unique() %>%
+  length()
+
+significant_water <- anova_results_df %>%
+  filter(Term == "Water" & `Pr(>F)` < significance_level) %>%
+  pull(GlobalID) %>%
+  unique() %>%
+  length()
+
+significant_interaction <- anova_results_df %>%
+  filter(Term == "Climate:Water" & `Pr(>F)` < significance_level) %>%
+  pull(GlobalID) %>%
+  unique() %>%
+  length()
+
+# Print the results
+cat("Number of significant compounds for Climate:", significant_climate, "\n")
+cat("Number of significant compounds for Water:", significant_water, "\n")
+cat("Number of significant compounds for Interaction:", significant_interaction, "\n")
+
+```
+
+# Get list of all significant compounds
+
+```{r}
+
+significant_compounds <- anova_results_df %>%
+  filter(`Pr(>F)` < significance_level) %>%
+  pull(GlobalID) %>%
+  unique()
+
+# Create a data frame to store significance types for each compound
+significance_types <- anova_results_df %>%
+  filter(GlobalID %in% significant_compounds, `Pr(>F)` < significance_level) %>%
+  group_by(GlobalID) %>%
+  summarize(
+    Climate = any(Term == "Climate" & `Pr(>F)` < significance_level),
+    Water = any(Term == "Water" & `Pr(>F)` < significance_level),
+    Interaction = any(Term == "Climate:Water" & `Pr(>F)` < significance_level)
+  ) %>%
+  mutate(
+    SignificanceType = case_when(
+      Climate & Water & Interaction ~ "All",
+      Climate & Water ~ "Climate & Water",
+      Climate & Interaction ~ "Climate & Interaction",
+      Water & Interaction ~ "Water & Interaction",
+      Climate ~ "Climate",
+      Water ~ "Water",
+      Interaction ~ "Interaction"
+    )
+  )
+
+```
+
+# Prepare data for heatmap
+
+```{r}
+library(dplyr)
+library(tidyr)
+library(tibble)
+library(pheatmap)
+
+# Assuming `merged_data`, `significant_compounds`, `metadata`, and `significance_types` are already loaded
+
+# Prepare the heatmap data
+heatmap_data <- merged_data %>%
+  filter(GlobalID %in% significant_compounds) %>%
+  group_by(GlobalID, Sample) %>%
+  summarize(Value = mean(Value, na.rm = TRUE), .groups = 'drop') %>%
+  pivot_wider(names_from = Sample, values_from = Value) %>%
+  column_to_rownames("GlobalID")
+
+# Check if there are still duplicate row names
+if (any(duplicated(rownames(heatmap_data)))) {
+  cat("Warning: There are still duplicate GlobalIDs. Adding a suffix to make them unique.\n")
+  rownames(heatmap_data) <- make.unique(rownames(heatmap_data))
+}
+
+# Remove non-numeric columns
+heatmap_data <- heatmap_data %>% select_if(is.numeric)
+
+# Create annotation data frame
+annotation_df <- metadata %>%
+  dplyr::select(Sample, Climate = Type1, Water = Type2) %>%
+  tibble::column_to_rownames("Sample")
+
+# Ensure all samples in heatmap_data are present in annotation_df
+common_samples <- intersect(colnames(heatmap_data), rownames(annotation_df))
+heatmap_data <- heatmap_data[, common_samples]
+annotation_df <- annotation_df[common_samples, ]
+
+# Create annotation colors
+ann_colors <- list(
+  Climate = c("Ambient" = "#66c2a5", "Warmed" = "#fc8d62"),
+  Water = c("Dry" = "#8da0cb", "Wet" = "#e78ac3")
+)
+
+# Assuming the first column in significance_types is the identifier for compounds
+row_annotation <- significance_types %>%
+  dplyr::select(1, SignificanceType) %>%
+  tibble::column_to_rownames(var = names(.)[1])
+
+# Ensure row_annotation matches heatmap_data
+row_annotation <- row_annotation[rownames(heatmap_data), , drop = FALSE]
+
+# Check if any NAs were introduced
+if (any(is.na(row_annotation))) {
+  cat("Warning: Some compounds in heatmap_data are missing from significance_types.\n")
+  # Remove rows with NA if necessary
+  row_annotation <- row_annotation[complete.cases(row_annotation), , drop = FALSE]
+}
+
+# Create annotation colors based on actual levels
+ann_colors <- list(
+  Climate = c("Ambient" = "#66c2a5", "Future" = "#fc8d62"),
+  Water = c("No_drought" = "#8da0cb", "Drought" = "#e78ac3")
+)
+
+# Create significance type colors
+sig_colors <- c(
+  "Climate" = "#e41a1c",
+  "Water" = "#377eb8",
+  "Interaction" = "#4daf4a",
+  "Climate & Water" = "#984ea3",
+  "Climate & Interaction" = "#ff7f00",
+  "Water & Interaction" = "#ffff33",
+  "All" = "#a65628"
+)
+
+# Combine annotation colors
+combined_ann_colors <- c(ann_colors, list(SignificanceType = sig_colors))
+
+# Save the heatmap to a PDF file
+pdf("significant_compounds_heatmap.pdf", width = 12, height = 8)
+p <- pheatmap(
+  heatmap_data,
+  scale = "row",
+  clustering_distance_rows = "correlation",
+  clustering_distance_cols = "correlation",
+  annotation_col = annotation_df,
+  annotation_row = row_annotation,
+  annotation_colors = combined_ann_colors,
+  show_rownames = FALSE,
+  show_colnames = FALSE,
+  main = "Hierarchical Clustering Heatmap of Significant Compounds"
+)
+dev.off()
+
+# Display the heatmap
+p <- pheatmap(
+  heatmap_data,
+  scale = "row",
+  clustering_distance_rows = "correlation",
+  clustering_distance_cols = "correlation",
+  annotation_col = annotation_df,
+  annotation_row = row_annotation,
+  annotation_colors = combined_ann_colors,
+  show_rownames = FALSE,
+  show_colnames = FALSE,
+  main = "Hierarchical Clustering Heatmap of Significant Compounds"
+)
+print(p)
+```
