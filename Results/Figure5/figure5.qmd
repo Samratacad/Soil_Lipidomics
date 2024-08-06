@@ -292,5 +292,6 @@ molecule_lists <- unique(merged_df$`Molecule List`)
 
 # Process all Molecule Lists
 results <- process_molecule_list(molecule_lists)
+write.xlsx(results, "lipid-class-concentration.xlsx", rowNames = FALSE)
 
 ```
