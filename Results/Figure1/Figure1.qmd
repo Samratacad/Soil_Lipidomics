@@ -1,8 +1,10 @@
 ---
 title: "Figure1"
 author: "Rahul Samrat"
-format: html
-server: shiny
+output: 
+  html_document:
+    theme: flatly
+    highlight: tango
 ---
 
 ## Figure 1: Overview of Soil Lipid Categories & Classes in the ClimgGrass Experiment
