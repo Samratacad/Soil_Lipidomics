@@ -1,0 +1,14 @@
+﻿Sample,Type1,Type2,Weight for lipid extraction (g)
+19,Ambient,No_drought,2.054
+22,Ambient,No_drought,1.965
+36,Ambient,No_drought,2.063
+28,Ambient,Drought,2.048
+44,Ambient,Drought,2.063
+49,Ambient,Drought,2.082
+35,Future,No_drought,2.065
+40,Future,No_drought,2.032
+52,Future,No_drought,2.033
+27,Future,Drought,2.071
+43,Future,Drought,2.028
+48,Future,Drought,2.027
+50,Future,Drought,0.178

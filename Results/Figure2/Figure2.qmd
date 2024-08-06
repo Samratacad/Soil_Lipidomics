@@ -1,0 +1,170 @@
+---
+title: "Figure2"
+format: html
+editor: visual
+---
+
+## Figure2(A)
+
+Principal component Analysis (PCA) of soil lipid profile \## Running Code
+
+## Load data
+
+```{r}
+library(readr)
+library(dplyr)
+library(ggplot2)
+library(FactoMineR)
+library(car)
+library(stats)
+library(multcomp)
+library(tibble)
+
+
+metadata <- read_csv('Metadata.csv')
+normalized_data <- read_csv('normalized_data.csv')
+
+
+```
+
+## Transpose normalized data
+
+```{r}
+
+normalized_data_t <- as.data.frame(t(normalized_data[-1]))
+colnames(normalized_data_t) <- normalized_data$GlobalID
+rownames(normalized_data_t) <- colnames(normalized_data)[-1]
+
+# Merge data
+metadata <- metadata %>% column_to_rownames(var = "Sample")
+merged_data <- merge(metadata, normalized_data_t, by = "row.names")
+rownames(merged_data) <- merged_data$Row.names
+merged_data <- merged_data[-1]
+
+# Extract dependent and independent variables
+dependent_vars <- merged_data[, -(1:2)]
+independent_vars <- merged_data[, 1:2]
+
+# Perform PCA
+pca_result <- PCA(dependent_vars, graph = FALSE)
+
+# Print eigenvalues and variance explained
+print(pca_result$eig)
+
+# Choose number of components to keep (in this case, 8)
+num_components_to_keep <- 9
+
+
+# Print the dimensions of pca_result$ind$coord
+print(dim(pca_result$ind$coord))
+
+# Get the number of available components
+num_available_components <- ncol(pca_result$ind$coord)
+
+# Print the number of available components
+print(paste("Number of available components:", num_available_components))
+
+# Choose the minimum between desired components and available components
+num_components_to_keep <- min(9, num_available_components)
+
+# Create PCA data frame with available components
+pca_data <- as.data.frame(pca_result$ind$coord[, 1:num_components_to_keep])
+pca_data <- cbind(pca_data, independent_vars)
+
+
+# Print the first few rows of the resulting data frame
+print(head(pca_data))
+
+
+```
+
+## PCA plot
+
+```{r}
+library(ggplot2)
+library(ggrepel)
+
+var_explained <- pca_result$eig[, "percentage of variance"]
+pc1_var <- round(var_explained[1], 1)
+pc2_var <- round(var_explained[2], 1)
+
+pca_plot <- ggplot(pca_data, aes(x = Dim.1, y = Dim.2, color = Type1, shape = Type2)) +
+  geom_point(size = 4, alpha = 0.8) +
+  scale_color_manual(values = c("Ambient" = "#0072B2", "Future" = "#D55E00"),
+                     name = "Climate Scenario") +
+  scale_shape_manual(values = c("Drought" = 16, "No_drought" = 17),
+                     name = "Water Condition") +
+  theme_bw(base_size = 14) +
+  theme(
+    panel.grid.minor = element_blank(),
+    panel.grid.major = element_line(color = "gray90"),
+    legend.position = "right",
+    legend.box = "vertical",
+    legend.key.size = unit(1, "cm"),
+    legend.text = element_text(size = 12),
+    legend.title = element_text(size = 14, face = "bold"),
+    plot.title = element_text(hjust = 0.5, face = "bold", size = 16),
+    axis.title = element_text(face = "bold", size = 14),
+    axis.text = element_text(size = 12)
+  ) +
+  labs(
+    title = "PCA of Soil Lipid Profiles",
+    x = paste0("PC 1 (", pc1_var, "%)"),
+    y = paste0("PC 2 (", pc2_var, "%)")
+  ) +
+  geom_hline(yintercept = 0, linetype = "dashed", color = "gray50") +
+  geom_vline(xintercept = 0, linetype = "dashed", color = "gray50") +
+  coord_fixed(ratio = 1)
+print(pca_plot)
+
+#use ggsave to export the plot as SVG
+ggsave("pca_soil_lipid_profiles.pdf", plot = pca_plot, width = 10, height = 8, units = "in", dpi = 300)
+```
+
+## Figure 2(B) Function to create interaction plot
+
+```{r}
+library(ggplot2)
+library(gridExtra)
+library(scales)
+
+# Function to create interaction plot with improved aesthetics
+create_interaction_plot <- function(data, x_var, y_var, color_var, y_label) {
+  ggplot(data, aes_string(x = x_var, y = y_var, color = color_var, group = color_var)) +
+    stat_summary(fun = mean, geom = "point", size = 3) +
+    stat_summary(fun = mean, geom = "line", size = 1) +
+    stat_summary(fun.data = mean_se, geom = "errorbar", width = 0.2, size = 0.8) +
+    labs(x = ifelse(x_var == "Type1", "Climate Scenario", "Water Condition"),
+         y = y_label,
+         color = ifelse(color_var == "Type1", "Climate Scenario", "Water Condition")) +
+    scale_color_brewer(palette = "Set1") +
+    theme_minimal() +
+    theme(
+      legend.position = "top",
+      legend.title = element_text(face = "bold"),
+      axis.title = element_text(face = "bold"),
+      axis.text = element_text(size = 10),
+      panel.grid.minor = element_blank(),
+      panel.border = element_rect(color = "black", fill = NA, size = 0.5)
+    )
+}
+
+# Create the four interaction plots
+plot1 <- create_interaction_plot(pca_data, "Type1", "Dim.1", "Type2", "PC1 Score")
+plot2 <- create_interaction_plot(pca_data, "Type2", "Dim.1", "Type1", "PC1 Score")
+plot3 <- create_interaction_plot(pca_data, "Type1", "Dim.2", "Type2", "PC2 Score")
+plot4 <- create_interaction_plot(pca_data, "Type2", "Dim.2", "Type1", "PC2 Score")
+
+# Combine the plots with improved layout
+combined_plot <- arrangeGrob(
+  plot1, plot2, plot3, plot4, 
+  ncol = 2, 
+  top = "Interaction Effects on PC1 and PC2 Scores"
+)
+
+# Save the plot in high resolution
+ggsave("interaction_plots.pdf", combined_plot, width = 12, height = 10, dpi = 300)
+
+# Display the combined plot
+grid.arrange(combined_plot)
+```
