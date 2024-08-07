@@ -58,6 +58,9 @@ graph TD
 5. Quality Control
 6. Compound Identification and Quantification
 
+## Results
+1. [Lipid annotation](./src/blob/main/Results/Figure1/Figure1.ipynb)
+
 ## Detailed Steps
 
 ### 1. Sample Preparation
