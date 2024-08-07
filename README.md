@@ -59,7 +59,7 @@ graph TD
 6. Compound Identification and Quantification
 
 ## Results
-1. [Lipid annotation](./src/blob/main/Results/Figure1/Figure1.ipynb)
+1. [Lipid annotation](Results/Figure1/Figure1.ipynb)
 
 ## Detailed Steps
 
