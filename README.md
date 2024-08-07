@@ -59,7 +59,27 @@ graph TD
 6. Compound Identification and Quantification
 
 ## Results
-1. [Lipid annotation](Results/Figure1/Figure1.ipynb)
+Here you can find the codes, generated figures, and datafile used for figures in the respective folder
+
+### Main Figures
+Fig1. [Lipid annotation using Library search and Prediction based approach](Results/Figure1/Figure1.ipynb)
+Fig2. [PCA and Interaction plot](Results/Figure2/Figure2.ipynb)
+Fig3. [FDR Hiararchical clustering Heatmap](Results/Figure3/Figure3.ipynb)
+Fig4. [Lipid Specificity & Shannon entropy](Results/Figure4/Figure4.ipynb)
+Fig5. [Class specific lipid concentration across treatment](Results/Figure5/figure5.ipynb)
+
+### Supplementary Figures
+
+1. Standards
+S1. [Calibration curve Standards](Results/Calibration-curves/Calibration-curve.ipynb)
+S2. [MS/MS spectra Standards](Results/Validation-of-current-lipidomics-workflow/LipidStandards/mass-spec-standards.ipynb)
+S3. [Table Lipid Standard LOQ/LOQ]
+2. Quality control POOL QC
+S4. [QC figure Classwise]
+3. External QC NIST SRM
+S4. [NIST SRM 1950 LipidQC]
+4. Lipid Recovery
+S5. [Recovery percentage internal standards]
 
 ## Detailed Steps
 
