@@ -6,39 +6,23 @@ execute:
   warning: false
 ---
 
-
-
-
-
 ## \# Function to calculate calibration parameters
 
 ```{r}
+## \# Function to calculate calibration parameters
+
 library(ggplot2)
 library(readxl)
 library(scales)
 library(grid)
 library(gridExtra)
 library(dplyr)
-
-
-## \# Function to calculate calibration parameters
-
-```{r}
-library(ggplot2)
-library(readxl)
-library(scales)
-library(grid)
-library(gridExtra)
-library(dplyr)
-
 
 calculate_calibration_parameters <- function(row) {
   concentrations <- c()
   areas <- c()
-  
   initial_concentration <- row[["Initial concentration"]]
-  injection_columns <- c(names(row)[grep("^0_0", names(row))], 
-                         unlist(lapply(1:7, function(i) paste0(i, "_", c(5, 1)))))
+  injection_columns <- c(names(row)[grep("^0_0", names(row))], unlist(lapply(1:7, function(i) paste0(i, "_", c(5, 1)))))
   
   for (col in injection_columns) {
     if (!is.na(row[[col]])) {
@@ -51,7 +35,6 @@ calculate_calibration_parameters <- function(row) {
         effective_concentration <- concentration * volume
       }
       area <- row[[col]]
-      
       concentrations <- c(concentrations, effective_concentration)
       areas <- c(areas, area)
     }
@@ -63,18 +46,51 @@ calculate_calibration_parameters <- function(row) {
   intercept <- coef(model)[1]
   r_squared <- summary(model)$r.squared
   
-  # Find LOD (first non-zero concentration)
-  non_zero_concentrations <- concentrations[concentrations > 0 & areas > 0]
-  LOD <- ifelse(length(non_zero_concentrations) > 0, min(non_zero_concentrations), NA)
+  # Modified LOD and LOQ calculation
+  non_zero_concentrations <- concentrations[concentrations > 0]
+  non_zero_areas <- areas[concentrations > 0]
   
-  # Find LOQ (lowest concentration that's at least 3 times LOD)
-  LOQ <- ifelse(!is.na(LOD), min(concentrations[concentrations >= 3 * LOD & areas > 0]), NA)
+  LOD <- NA
+  LOQ <- NA
   
-  # If no concentration meets the 3*LOD criterion, use the highest calibrator
-  if (is.na(LOQ)) {
-    LOQ <- max(concentrations)
+  if (length(non_zero_concentrations) > 0) {
+    blank_signal <- mean(areas[concentrations == 0])
+    blank_sd <- sd(areas[concentrations == 0])
+    
+    if (is.na(blank_sd) || blank_sd == 0) {
+      blank_sd <- min(non_zero_areas) / 10  # Fallback if SD is 0
+    }
+    
+    signal_noise_ratio <- 3
+    LOD_calc <- (blank_signal + signal_noise_ratio * blank_sd - intercept) / slope
+    
+    if (is.finite(LOD_calc) && LOD_calc > 0) {
+      LOD <- LOD_calc
+    } else {
+      LOD <- min(non_zero_concentrations) / 10  # Fallback LOD
+    }
+    
+    # LOQ calculation
+    potential_LOQ <- min(concentrations[concentrations >= 3 * LOD & areas > 0])
+    if (is.finite(potential_LOQ) && potential_LOQ > 0) {
+      LOQ <- potential_LOQ
+    } else {
+      LOQ <- max(concentrations)  # Fallback LOQ
+    }
   }
   
+  # Debugging prints
+  #print(paste("Molecule:", row[["Molecule"]]))
+  #print(paste("Initial concentration:", initial_concentration))
+  #print(paste("Number of non-zero concentrations:", length(non_zero_concentrations)))
+  #print(paste("Minimum non-zero concentration:", min(non_zero_concentrations)))
+  #print(paste("Maximum concentration:", max(concentrations)))
+  #print(paste("Slope:", slope))
+  #print(paste("Intercept:", intercept))
+  #print(paste("R-squared:", r_squared))
+  #print(paste("LOD calculation:", LOD))
+  #print(paste("LOQ calculation:", LOQ))
+
   return(list(
     slope = slope,
     intercept = intercept,
@@ -125,8 +141,8 @@ for (i in 1:nrow(best_r2_rows)) {
     "\nAdduct:", adduct,
     "\nSlope:", format(result$slope, scientific = TRUE),
     "\nIntercept:", format(result$intercept, scientific = TRUE),
-    "\nLOD (ng):", sprintf("%.2f", result$LOD),
-    "\nLOQ (ng):", sprintf("%.2f", result$LOQ),
+    "\nLOD (ng):", ifelse(is.na(result$LOD), "N/A", sprintf("%.2f", result$LOD)),
+    "\nLOQ (ng):", ifelse(is.na(result$LOQ), "N/A", sprintf("%.2f", result$LOQ)),
     "\nR²:", round(result$r_squared, 4)
   )
   
@@ -140,7 +156,7 @@ for (i in 1:nrow(best_r2_rows)) {
       x = "Concentration (log scale)",
       y = "Area (log scale)"
     ) +
-    scale_x_log10() +
+    scale_x_log10(labels = scales::scientific_format(digits = 2)) +
     scale_y_log10(labels = scales::scientific_format(digits = 2)) +
     scale_color_manual(values = c("Standard" = "navy", "Blank" = "darkred")) +
     scale_fill_manual(values = c("Standard" = "royalblue", "Blank" = "pink")) +
@@ -170,7 +186,6 @@ for (i in 1:nrow(best_r2_rows)) {
   # Add the plot to the list
   plot_list[[i]] <- p
 }
-
 # Display all plots in the R console
 for (p in plot_list) {
   print(p)

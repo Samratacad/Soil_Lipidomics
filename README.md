@@ -1,8 +1,12 @@
 # Soil Sample Analysis Workflow
 
+<<<<<<< Updated upstream
 This README describes the workflow for analyzing freeze-dried soil samples using a combination of chemical extraction, chromatography, and computational analysis techniques.
 
 ## Workflow Diagram
+=======
+The following diagram represents the workflow use for Lipidomics analysis in ClimGrass Experiment. Click on any box to view more detailed information about that process.
+>>>>>>> Stashed changes
 
 ```mermaid
 graph TD
@@ -51,12 +55,20 @@ graph TD
 
 ## Workflow Overview
 
+<<<<<<< Updated upstream
 1. Sample Preparation
 2. Lipid Extraction
 3. Chromatographic Analysis
 4. Data Processing
 5. Quality Control
 6. Compound Identification and Quantification
+=======
+1. The process begins with four different soil sample conditions:
+   - [🍃 Ambient]
+   - [💧 Ambient + Drought]
+   - [☁️ Future +300 ppm CO2]
+   - [🌡️ Future +300 ppm CO2 + 3°C](future-co2-temp.md)
+>>>>>>> Stashed changes
 
 ## Results
 Here you can find the codes, generated figures, and datafile used for figures in the respective folder
