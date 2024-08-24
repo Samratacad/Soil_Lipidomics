@@ -1,12 +1,11 @@
 # Soil Sample Analysis Workflow
 
-<<<<<<< Updated upstream
 This README describes the workflow for analyzing freeze-dried soil samples using a combination of chemical extraction, chromatography, and computational analysis techniques.
 
 ## Workflow Diagram
 =======
 The following diagram represents the workflow use for Lipidomics analysis in ClimGrass Experiment. Click on any box to view more detailed information about that process.
->>>>>>> Stashed changes
+
 
 ```mermaid
 graph TD
@@ -55,20 +54,13 @@ graph TD
 
 ## Workflow Overview
 
-<<<<<<< Updated upstream
 1. Sample Preparation
 2. Lipid Extraction
 3. Chromatographic Analysis
 4. Data Processing
 5. Quality Control
 6. Compound Identification and Quantification
-=======
-1. The process begins with four different soil sample conditions:
-   - [🍃 Ambient]
-   - [💧 Ambient + Drought]
-   - [☁️ Future +300 ppm CO2]
-   - [🌡️ Future +300 ppm CO2 + 3°C](future-co2-temp.md)
->>>>>>> Stashed changes
+
 
 ## Results
 Here you can find the codes, generated figures, and datafile used for figures in the respective folder
@@ -85,11 +77,11 @@ Fig5. [Class specific lipid concentration across treatment](Results/Figure5/figu
 1. Standards
 S1. [Calibration curve Standards](Results/Calibration-curves/Calibration-curve.ipynb)
 S2. [MS/MS spectra Standards](Results/Validation-of-current-lipidomics-workflow/LipidStandards/mass-spec-standards.ipynb)
-S3. [Table Lipid Standard LOQ/LOQ]
-2. Quality control POOL QC
+S3. [Table Lipid Standard LOQ/LOQ](supplementary/calibration_table.pdf)
+2. [Quality control POOL QC](supplementary/QC_percentage_differences_plot_with_threshold_neg.pdf)
 S4. [QC figure Classwise]
 3. External QC NIST SRM
-S4. [NIST SRM 1950 LipidQC]
+S4. [NIST SRM 1950 LipidQC](supplementary/Soil_lipidomcis_NISTSRM1950.png)
 4. Lipid Recovery
 S5. [Recovery percentage internal standards]
 
@@ -135,7 +127,7 @@ Multiple QC steps are implemented throughout the workflow:
 
 #### Quantification:
 - Compound Classification using Class-specific standards
-- Compound Quantification using IS Model
+- Compound Quantification using Ionization efficiency Model
 
 ## Tools and Technologies
 
@@ -148,4 +140,4 @@ Multiple QC steps are implemented throughout the workflow:
 - Quality control measures are implemented at multiple stages to ensure data reliability.
 - The process allows for both targeted and untargeted analysis of lipids in soil samples.
 
-For more detailed information on each step, please refer to the specific protocols and standard operating procedures.
+For more detailed information on each step, please refer to the specific folder readmd file.
