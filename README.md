@@ -66,14 +66,14 @@ graph TD
 Here you can find the codes, generated figures, and datafile used for figures in the respective folder
 
 ### Main Figures
-Fig1. [Lipid annotation using Library search and Prediction based approach](Results/Figure1/Figure1.ipynb)
-Fig2. [PCA and Interaction plot](Results/Figure2/Figure2.ipynb)
-Fig3. [FDR Hiararchical clustering Heatmap](Results/Figure3/Figure3.ipynb)
-Fig4. [Lipid Specificity & Shannon entropy](Results/Figure4/Figure4.ipynb)
-Fig5. [Class specific lipid concentration across treatment](Results/Figure5/figure5.ipynb)
+- Fig1.[Lipid annotation using Library search and Prediction based approach](Results/Figure1/Figure1.ipynb)
+- Fig2.[PCA and Interaction plot](Results/Figure2/Figure2.ipynb)
+- Fig3.[FDR Hiararchical clustering Heatmap](Results/Figure3/Figure3.ipynb)
+- Fig4.[Lipid Specificity & Shannon entropy](Results/Figure4/Figure4.ipynb)
+- Fig5.[Class specific lipid concentration across treatment](Results/Figure5/figure5.ipynb)
 
 ### Supplementary files
-1. [Info](supplementary/Table-S1.docx)
+- [Info](supplementary/Table-S1.docx)
 
 ### Supplementary Figures
 
