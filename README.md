@@ -72,6 +72,9 @@ Fig3. [FDR Hiararchical clustering Heatmap](Results/Figure3/Figure3.ipynb)
 Fig4. [Lipid Specificity & Shannon entropy](Results/Figure4/Figure4.ipynb)
 Fig5. [Class specific lipid concentration across treatment](Results/Figure5/figure5.ipynb)
 
+### Supplementary files
+1. [Info](supplementary/Table-S1.docx)
+
 ### Supplementary Figures
 
 1. Standards
