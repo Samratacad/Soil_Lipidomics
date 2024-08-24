@@ -3,8 +3,8 @@
 This README describes the workflow for analyzing freeze-dried soil samples using a combination of chemical extraction, chromatography, and computational analysis techniques.
 
 ## Workflow Diagram
-=======
-The following diagram represents the workflow use for Lipidomics analysis in ClimGrass Experiment. Click on any box to view more detailed information about that process.
+
+The following diagram represents the workflow used for Lipidomics analysis in ClimGrass Experiment. Click on any box to view more detailed information about that process.
 
 
 ```mermaid
@@ -101,9 +101,11 @@ S5. [Recovery percentage internal standards]
 - Total Lipid Extraction Batch
 - Sample Worklist (spike External Standards, pool QC Samples)
 
-### 3. Chromatographic Analysis
+### 3. Chromatographic & High-resolution MS/MS analysis
 
 - LC Orbitrap MS/MS
+  - [LC parameters](methods/LC-parameters.pdf)
+  - [Orbitrap parameters](methods/Orbitrap-parameters.pdf)
 - Untargeted analysis
 
 ### 4. Data Processing
