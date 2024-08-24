@@ -110,19 +110,19 @@ S5. [Recovery percentage internal standards]
 
 - Identification
 - Quantification
-
+  
 ### 5. Quality Control
 
 Multiple QC steps are implemented throughout the workflow:
 
--NIST SRM Inter laboratory comparison
-  -[Position ionization mode table](supplementary/Soil_lipidomics_SRM1950.pdf)
-  -[Positive ionization mode plot](supplementary/Soil_lipidomcis_NISTSRM1950.png)
-  -[Negative ionization mode table]()
-  -[Negative ionization mode plot]()
-- POOL QC 
-- External Standard Calibration
-- Lipid Recovery using Internal Standard
+- **NIST SRM Inter Laboratory Comparison**
+  - [Position Ionization Mode Table](supplementary/Soil_lipidomics_SRM1950.pdf)
+  - [Positive Ionization Mode Plot](supplementary/Soil_lipidomcis_NISTSRM1950.png)
+  - [Negative Ionization Mode Table]()
+  - [Negative Ionization Mode Plot]()
+- **POOL QC**
+- **External Standard Calibration**
+- **Lipid Recovery using Internal Standard**
 
 ### 6. Compound Identification and Quantification
 
