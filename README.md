@@ -77,14 +77,15 @@ Here you can find the codes, generated figures, and datafile used for figures in
 
 ### Supplementary Figures
 
-1. Standards
-S1. [Calibration curve Standards](Results/Calibration-curves/Calibration-curve.ipynb)
-S2. [MS/MS spectra Standards](Results/Validation-of-current-lipidomics-workflow/LipidStandards/mass-spec-standards.ipynb)
-S3. [Table Lipid Standard LOQ/LOQ](supplementary/calibration_table.pdf)
-2. [Quality control POOL QC](supplementary/QC_percentage_differences_plot_with_threshold_neg.pdf)
-S4. [QC figure Classwise]
+1. **Standards**
+- S1.[Calibration curve Standards](Results/Calibration-curves/Calibration-curve.ipynb)
+- S2.[MS/MS spectra Standards](Results/Validation-of-current-lipidomics-workflow/LipidStandards/mass-spec-standards.ipynb)
+- S3.[Table Lipid Standard LOQ/LOQ](supplementary/calibration_table.pdf)
+2. **POOL Quality Control
+- S4.[Quality control POOL QC](supplementary/QC_percentage_differences_plot_with_threshold_neg.pdf)
+- S5.[QC figure Classwise]
 3. External QC NIST SRM
-S4. [NIST SRM 1950 LipidQC](supplementary/Soil_lipidomcis_NISTSRM1950.png)
+- S6.[NIST SRM 1950 LipidQC](supplementary/Soil_lipidomcis_NISTSRM1950.png)
 4. Lipid Recovery
 S5. [Recovery percentage internal standards]
 
