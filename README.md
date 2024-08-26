@@ -56,7 +56,7 @@ graph TD
 
 1. Sample Preparation
 2. Lipid Extraction
-3. Chromatographic Analysis
+3. Chromatographic & mass spectrometry Analysis
 4. Data Processing
 5. Quality Control
 6. Compound Identification and Quantification
