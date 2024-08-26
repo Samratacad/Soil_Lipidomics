@@ -121,7 +121,7 @@ Here you can find the codes, generated figures, and datafile used for figures in
   - **Library-search**
     - [Lipidsearch 5](supplementary/Identification/lipidsearch5-identification)
     - [Online GNPS search](supplementary/Identification/GNPS-identification)
-  - [Prediction-based]
+  - **Prediction-based**
     - [SIRIUS 5](supplementary/Identification/SIRIUS5-identification) 
   
 - Quantification
