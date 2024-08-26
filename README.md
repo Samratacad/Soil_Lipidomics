@@ -1,6 +1,6 @@
 # Soil Sample Analysis Workflow
 
-This README describes the workflow for analyzing freeze-dried soil samples using a combination of chemical extraction, chromatography, and computational analysis techniques.
+This README describes the workflow for analyzing soil samples using the protocol provided in the paper.
 
 ## Workflow Diagram
 
