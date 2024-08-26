@@ -112,21 +112,8 @@ Here you can find the codes, generated figures, and datafile used for figures in
   - [Orbitrap parameters](methods/Orbitrap-parameters.pdf)
 - Untargeted analysis
   - Raw data files are deposited in [MASSIVE database]()
-    
-
-### 4. Data Processing
-
-- **Identification**
-  Here you can find the combined annotation from all [approach](supplementary/Identification/ALL-COMBINED.xlsx)
-  - **Library-search**
-    - [Lipidsearch 5](supplementary/Identification/lipidsearch5-identification)
-    - [Online GNPS search](supplementary/Identification/GNPS-identification)
-  - **Prediction-based**
-    - [SIRIUS 5](supplementary/Identification/SIRIUS5-identification) 
-  
-- Quantification
-  
-### 5. Quality Control
+ 
+### 4. Quality Control
 
 Multiple QC steps are implemented throughout the workflow:
 
@@ -140,14 +127,24 @@ Multiple QC steps are implemented throughout the workflow:
 - **External Standard Calibration**
   - 
 - **Lipid Recovery using Internal Standard**
+    
+
+### 5. Data Processing
+*raw files are processed using Lipidsearch 5 and Mzmime3*
+- [Mzmime3 files]()
+- [Lipidsearch5]()
+- [Sirius5]()
+- [Skyline]() *transition list is prepared to perform a targeted analysis for quantification*
 
 ### 6. Compound Identification and Quantification
 
 #### Identification:
-- Library search (LipidSearch 5)
-- In Silico MS/MS prediction SIRIUS 5
-- Online Search GNPS platform
-- FBMN GNPS platform
+  Here you can find the combined annotation from all [approach](supplementary/Identification/ALL-COMBINED.xlsx)
+  - **Library-search**
+    - [Lipidsearch 5](supplementary/Identification/lipidsearch5-identification)
+    - [Online GNPS search](supplementary/Identification/GNPS-identification)
+  - **Prediction-based**
+    - [SIRIUS 5](supplementary/Identification/SIRIUS5-identification) 
 
 #### Quantification:
 - Compound Classification using Class-specific standards
