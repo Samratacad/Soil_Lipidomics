@@ -119,8 +119,7 @@ Here you can find the codes, generated figures, and datafile used for figures in
 - **Identification**
   - **Library-search**
     - [Lipidsearch 5](supplementary/Identification/lipidsearch5-identification)
-    - [Mzmime3]
-    - [GNPS FBMN]
+    - [Online GNPS search](supplementary/Identification/GNPS-identification)
   - [Prediction-based]
     - [SIRIUS 5] 
   
