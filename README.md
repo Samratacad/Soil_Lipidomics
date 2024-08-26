@@ -1,6 +1,6 @@
 # Soil Sample Analysis Workflow
 
-This README describes the workflow for analyzing freeze-dried soil samples using a combination of chemical extraction, chromatography, and computational analysis techniques.
+This README describes the workflow for analyzing soil samples using the protocol provided in the paper.
 
 ## Workflow Diagram
 
@@ -56,7 +56,7 @@ graph TD
 
 1. Sample Preparation
 2. Lipid Extraction
-3. Chromatographic Analysis
+3. Chromatographic & mass spectrometry Analysis
 4. Data Processing
 5. Quality Control
 6. Compound Identification and Quantification
@@ -112,20 +112,8 @@ Here you can find the codes, generated figures, and datafile used for figures in
   - [Orbitrap parameters](methods/Orbitrap-parameters.pdf)
 - Untargeted analysis
   - Raw data files are deposited in [MASSIVE database]()
-    
-
-### 4. Data Processing
-
-- **Identification**
-  - **Library-search**
-    - [Lipidsearch 5](supplementary/Identification/lipidsearch5-identification)
-    - [Online GNPS search](supplementary/Identification/GNPS-identification)
-  - [Prediction-based]
-    - [SIRIUS 5] 
-  
-- Quantification
-  
-### 5. Quality Control
+ 
+### 4. Quality Control
 
 Multiple QC steps are implemented throughout the workflow:
 
@@ -139,14 +127,27 @@ Multiple QC steps are implemented throughout the workflow:
 - **External Standard Calibration**
   - 
 - **Lipid Recovery using Internal Standard**
+    
+
+### 5. Data Processing
+*raw files are processed using Lipidsearch 5 and Mzmime3*
+- [Mzmime3 files]()
+- [Lipidsearch5]()
+- [Sirius5]()
+- [Skyline]() *transition list is prepared to perform a targeted analysis for quantification*
+- **GNPS analysis perform online. Here are the links for files and results**
+  - [GNPS_POS](https://gnps.ucsd.edu/ProteoSAFe/status.jsp?task=14a6275c9e264972849f2b6a3f39df25)
+  - [GNPS_NEG](https://gnps.ucsd.edu/ProteoSAFe/status.jsp?task=6f2be01f485b4a34a77ec1c735a59357)
 
 ### 6. Compound Identification and Quantification
 
 #### Identification:
-- Library search (LipidSearch 5)
-- In Silico MS/MS prediction SIRIUS 5
-- Online Search GNPS platform
-- FBMN GNPS platform
+  Here you can find the combined annotation from all [approach](supplementary/Identification/ALL-COMBINED.xlsx)
+  - **Library-search**
+    - [Lipidsearch 5](supplementary/Identification/lipidsearch5-identification)
+    - [Online GNPS search](supplementary/Identification/GNPS-identification)
+  - **Prediction-based**
+    - [SIRIUS 5](supplementary/Identification/SIRIUS5-identification) 
 
 #### Quantification:
 - Compound Classification using Class-specific standards
