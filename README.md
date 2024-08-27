@@ -98,7 +98,7 @@ Here you can find the codes, generated figures, and datafile used for figures in
 
 - [Freeze-dried soil samples (3x per treatment)](methods/Extraction/Sample_used_for_lipid_extraction.pdf)
 - [Class-specific heavy isotope standards (13 classes, 10ng/compound)](methods/Extraction/Internal_Standard_spiked_in_soil_samples.pdf)
-- NIST SRM 1950 Plasma (50ul) as a reference
+- [NIST SRM 1950 Plasma (50ul) as a reference](https://tsapps.nist.gov/srmext/certificates/1950.pdf)
 
 ### 2. Lipid Extraction
 
