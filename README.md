@@ -134,7 +134,7 @@ Multiple QC steps are implemented throughout the workflow:
 - [Mzmime3 files]()
 - [Lipidsearch5]()
 - [Sirius5]()
-- [Skyline]() *transition list is prepared to perform a targeted analysis for quantification*
+- [Skyline](methods/SKYLINE-Workflow/skyline.md) *transition list is prepared to perform a targeted analysis for quantification*
 - **GNPS analysis perform online. Here are the links for files and results**
   - [GNPS_POS](https://gnps.ucsd.edu/ProteoSAFe/status.jsp?task=14a6275c9e264972849f2b6a3f39df25)
   - [GNPS_NEG](https://gnps.ucsd.edu/ProteoSAFe/status.jsp?task=6f2be01f485b4a34a77ec1c735a59357)
