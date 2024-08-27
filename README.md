@@ -96,14 +96,14 @@ Here you can find the codes, generated figures, and datafile used for figures in
 
 ### 1. Sample Preparation
 
-- [Freeze-dried soil samples (3x per treatment)](methods/Sample_used_for_lipid_extraction.pdf)
-- [Class-specific heavy isotope standards (13 classes, 10ng/compound)](methods/Internal_Standard_spiked_in_soil_samples.pdf)
+- [Freeze-dried soil samples (3x per treatment)](methods/Extraction/Sample_used_for_lipid_extraction.pdf)
+- [Class-specific heavy isotope standards (13 classes, 10ng/compound)](methods/Extraction/Internal_Standard_spiked_in_soil_samples.pdf)
 - NIST SRM 1950 Plasma (50ul) as a reference
 
 ### 2. Lipid Extraction
 
-- Total Lipid Extraction Batch
-- Sample Worklist (spike External Standards, pool QC Samples)
+- [Total Lipid Extraction protocol](methods/Extraction/TLE-SOP.pdf)
+- [Sample Worklist (spike External Standards, pool QC Samples)](methods/Extraction/sample-worklist-climgrass.pdf)
 
 ### 3. Chromatographic & High-resolution MS/MS analysis
 
