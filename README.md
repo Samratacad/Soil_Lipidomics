@@ -133,7 +133,7 @@ Multiple QC steps are implemented throughout the workflow:
 *raw files are processed using Lipidsearch 5 and Mzmime3*
 - [Mzmime3 files](methods/Dataprocessing/mzmine3)
 - [Lipidsearch5]()
-- [Sirius5](methods/Dataprocessing/sirius5/SIRIUS 5 Prediction settings for.pdf)
+- [Sirius5](methods/Dataprocessing/sirius5/SIRIUS5predictionSettings.pdf)
 - [Skyline](methods/SKYLINE-Workflow/skyline.md) *transition list is prepared to perform a targeted analysis for quantification*
 - **GNPS analysis perform online. Here are the links for files and results**
   - [GNPS_POS](https://gnps.ucsd.edu/ProteoSAFe/status.jsp?task=14a6275c9e264972849f2b6a3f39df25)
@@ -150,8 +150,8 @@ Multiple QC steps are implemented throughout the workflow:
     - [SIRIUS 5](supplementary/Identification/SIRIUS5-identification) 
 
 #### Quantification:
-- Compound Classification using Class-specific standards
-- Compound Quantification using Ionization efficiency Model
+- [Compound Classification using Class-specific standards](Results/Figure5/figure5.ipynb)
+- [Compound Quantification using Ionization Efficiency Model](Results/IEmodel)
 
 ## Tools and Technologies
 
