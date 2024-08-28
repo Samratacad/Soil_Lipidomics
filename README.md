@@ -150,8 +150,8 @@ Multiple QC steps are implemented throughout the workflow:
     - [SIRIUS 5](supplementary/Identification/SIRIUS5-identification) 
 
 #### Quantification:
-- Compound Classification using Class-specific standards
-- Compound Quantification using Ionization efficiency Model
+- [Compound Classification using Class-specific standards](Results/Figure5/figure5.ipynb)
+- [Compound Quantification using Ionization Efficiency Model]()
 
 ## Tools and Technologies
 
