@@ -151,7 +151,7 @@ Multiple QC steps are implemented throughout the workflow:
 
 #### Quantification:
 - [Compound Classification using Class-specific standards](Results/Figure5/figure5.ipynb)
-- [Compound Quantification using Ionization Efficiency Model]()
+- [Compound Quantification using Ionization Efficiency Model](Results/IEmodel)
 
 ## Tools and Technologies
 
