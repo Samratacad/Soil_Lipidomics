@@ -131,7 +131,7 @@ Multiple QC steps are implemented throughout the workflow:
 
 ### 5. Data Processing
 *raw files are processed using Lipidsearch 5 and Mzmime3*
-- [Mzmime3 files]()
+- [Mzmime3 files](methods/Dataprocessing/mzmine3)
 - [Lipidsearch5]()
 - [Sirius5]()
 - [Skyline](methods/SKYLINE-Workflow/skyline.md) *transition list is prepared to perform a targeted analysis for quantification*
