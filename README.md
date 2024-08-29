@@ -118,10 +118,10 @@ Here you can find the codes, generated figures, and datafile used for figures in
 Multiple QC steps are implemented throughout the workflow:
 
 - **NIST SRM Inter Laboratory Comparison**
-  - [Positive Ionization Mode Table](supplementary/Soil_lipidomics_SRM1950.pdf)
-  - [Positive Ionization Mode Plot](supplementary/Soil_lipidomcis_NISTSRM1950.png)
-  - [Negative Ionization Mode Table]()
-  - [Negative Ionization Mode Plot]()
+  - [Positive Ionization Mode Table](methods/Quality-control/NIST-SRM/positive/OE12-3LipidQC-v1.0pos.pdf)
+  - [Positive Ionization Mode Plot](methods/Quality-control/NIST-SRM/positive/SRM9150positive.png)
+  - [Negative Ionization Mode Table](methods/Quality-control/NIST-SRM/negative/LipidQC-v1.0-neg.pdf)
+  - [Negative Ionization Mode Plot](methods/Quality-control/NIST-SRM/negative/nist-neg.png)
 - **POOL QC**
   - [Analysis of variance across POOL sample runs (Positive mode)](supplementary/QC_percentage_differences_plot_with_threshold_neg.pdf)
 - **External Standard Calibration**
