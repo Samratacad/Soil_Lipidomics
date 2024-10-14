@@ -34,9 +34,9 @@ graph TD
     subgraph ID [Identification Pathway]
         style ID fill:#e6ffe6,stroke:#66cc66,stroke-width:2px
         H --> M1[Library search LipidSearch 5]
-        click M1 "#library-search-lipidsearch-5"
+        click M1 "https://github.com/Samratacad/Soil_Lipidomics/blob/main/methods/Dataprocessing/lipidsearch5/lipidsearch5-identification.pdf"
         H --> M2[In Silico MS/MS prediction SIRIUS 5]
-        click M2 "#in-silico-msms-prediction-sirius-5"
+        click M2 "https://github.com/Samratacad/Soil_Lipidomics/blob/main/methods/Dataprocessing/sirius5/SIRIUS5predictionSettings.pdf"
         H --> M3[Online Search GNPS platform]
         click M3 "#online-search-gnps-platform"
         H --> M4[FBMN GNPS platform]
