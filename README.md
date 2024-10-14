@@ -116,7 +116,8 @@ Here you can find the codes, generated figures, and datafile used for figures in
 ### 4. Quality Control
 
 Multiple QC steps are implemented throughout the workflow:
-
+- **Lipidomics Minimal Reporting Checklist**
+  - [Lipidomics sample checklist](https://github.com/Samratacad/Soil_Lipidomics/blob/main/methods/Quality-control/TableS5_QA-ILS.pdf)
 - **NIST SRM Inter Laboratory Comparison**
   - [Positive Ionization Mode Table](methods/Quality-control/NIST-SRM/positive/OE12-3LipidQC-v1.0pos.pdf)
   - [Positive Ionization Mode Plot](methods/Quality-control/NIST-SRM/positive/SRM9150positive.png)
