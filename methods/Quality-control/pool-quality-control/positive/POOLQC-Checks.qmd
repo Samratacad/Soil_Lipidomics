@@ -1,0 +1,236 @@
+---
+title: "QC_check_Plot"
+format: html
+editor: visual
+execute: 
+  warning: false
+---
+
+## POOL QC check
+
+```{r}
+# Load necessary libraries
+library(ggplot2)
+library(reshape2)
+library(viridis)  # For a color-blind friendly palette
+
+# Load the data
+file_path <- 'POOLQC-POS.csv'
+data <- read.csv(file_path)
+
+# Define QC sample columns
+qc_columns <- grep('Sum.Total.Area', names(data), value = TRUE)
+
+# Ensure the data in these columns is numeric and handle non-numeric values
+for (col in qc_columns) {
+  data[[col]] <- as.numeric(as.character(data[[col]]))
+}
+
+# Normalize the data using log transformation to reduce variability
+normalized_data <- data
+for (col in qc_columns) {
+  normalized_data[[col]] <- ifelse(normalized_data[[col]] > 0, log(normalized_data[[col]]), NA)
+}
+
+# Calculate the mean and percentage differences from the mean for each molecule across all QC samples
+normalized_data$Mean_All_QC <- rowMeans(normalized_data[qc_columns], na.rm = TRUE)
+for (col in qc_columns) {
+  normalized_data[[paste('Perc_Diff', col, sep = '_')]] <- (normalized_data[[col]] - normalized_data$Mean_All_QC) / normalized_data$Mean_All_QC * 100
+}
+
+# Melt the dataframe to have a long format for plotting
+perc_differences <- melt(normalized_data, id.vars = c('Molecule', 'Mean_All_QC'), 
+                         measure.vars = grep('Perc_Diff', names(normalized_data), value = TRUE),
+                         variable.name = 'QC_Sample', value.name = 'Perc_Difference')
+
+# Calculate the mean percentage difference and standard deviation of the percentage differences
+mean_perc_diff <- mean(perc_differences$Perc_Difference, na.rm = TRUE)
+std_perc_diff <- sd(perc_differences$Perc_Difference, na.rm = TRUE)
+
+# Calculate the limits of agreement
+loa_upper <- mean_perc_diff + 1.96 * std_perc_diff
+loa_lower <- mean_perc_diff - 1.96 * std_perc_diff
+
+# Calculate percentages inside and outside LoA
+total_points <- nrow(perc_differences)
+points_inside_loa <- sum(perc_differences$Perc_Difference >= loa_lower & 
+                           perc_differences$Perc_Difference <= loa_upper, na.rm = TRUE)
+percent_inside <- round(points_inside_loa / total_points * 100, 2)
+percent_outside <- round(100 - percent_inside, 2)
+
+# Create annotation text
+annotation_text <- sprintf("Within LoA: %.2f%%\nOutside LoA: %.2f%%", percent_inside, percent_outside)
+
+# Calculate the plot limits
+x_range <- range(perc_differences$Mean_All_QC, na.rm = TRUE)
+y_range <- range(perc_differences$Perc_Difference, na.rm = TRUE)
+
+
+# Function to calculate percentage outside LoA for a given threshold
+calc_outside_loa_percentage <- function(data, threshold, loa_lower, loa_upper) {
+  filtered_data <- data %>% filter(Mean_All_QC >= threshold)
+  total_points <- nrow(filtered_data)
+  points_outside_loa <- sum(filtered_data$Perc_Difference < loa_lower | 
+                            filtered_data$Perc_Difference > loa_upper, na.rm = TRUE)
+  return(points_outside_loa / total_points * 100)
+}
+
+# Calculate percentages for different thresholds
+thresholds <- seq(14.0, 14, by = 0.2)
+percentages <- sapply(thresholds, function(t) calc_outside_loa_percentage(perc_differences, t, loa_lower, loa_upper))
+
+# Find the threshold where percentage drops below 20% (or adjust as needed)
+optimal_threshold <- thresholds[which(percentages < 20)[1]]
+
+# If no threshold is found, use the last one
+if(is.na(optimal_threshold)) optimal_threshold <- tail(thresholds, 1)
+
+# Calculate final percentages for annotation
+final_percentage_inside <- 100 - calc_outside_loa_percentage(perc_differences, optimal_threshold, loa_lower, loa_upper)
+final_percentage_outside <- 100 - final_percentage_inside
+
+# Back-calculate the peak area threshold
+peak_area_threshold <- exp(optimal_threshold)
+
+# Print the result
+cat("Log-transformed threshold:", optimal_threshold, "\n")
+cat("Corresponding peak area threshold:", peak_area_threshold, "\n")
+
+# If you want to add this information to your plot:
+annotation_text <- sprintf(
+  "Within LoA: %.2f%%\nOutside LoA: %.2f%%\nPeak Area Threshold: %.2e",
+  100 - calc_outside_loa_percentage(perc_differences, optimal_threshold, loa_lower, loa_upper),
+  calc_outside_loa_percentage(perc_differences, optimal_threshold, loa_lower, loa_upper),
+  peak_area_threshold
+)
+
+
+
+```
+
+## Quality control Check for peak area across all QC samples
+
+```{r}
+# Plotting code
+ggplot(perc_differences, aes(x = Mean_All_QC, y = Perc_Difference, color = QC_Sample)) +
+  geom_point(alpha = 0.7, size = 2) +
+  geom_hline(yintercept = mean_perc_diff, color = 'gray30', linetype = 'dashed', size = 0.5) +
+  geom_hline(yintercept = loa_upper, color = 'firebrick', linetype = 'dashed', size = 0.5) +
+  geom_hline(yintercept = loa_lower, color = 'firebrick', linetype = 'dashed', size = 0.5) +
+  geom_vline(xintercept = optimal_threshold, color = 'blue', linetype = 'dashed', size = 0.5) +
+  annotate("text", 
+           x = min(perc_differences$Mean_All_QC, na.rm = TRUE) + diff(range(perc_differences$Mean_All_QC, na.rm = TRUE))/8, 
+           y = max(perc_differences$Perc_Difference, na.rm = TRUE) - diff(range(perc_differences$Perc_Difference, na.rm = TRUE))/20,
+           label = annotation_text, 
+           hjust = 0.5, vjust = 0.5, size = 3.5, color = "black"
+  ) +
+  annotate("text", x = optimal_threshold, y = max(perc_differences$Perc_Difference, na.rm = TRUE), 
+           label = sprintf("Threshold: %.2f", optimal_threshold), hjust = -0.1, vjust = 1, color = "blue", size = 3) +
+  annotate("text", x = max(perc_differences$Mean_All_QC, na.rm = TRUE), y = loa_upper, 
+           label = "Upper LoA", hjust = 1, vjust = -0.5, color = "firebrick", size = 3) +
+  annotate("text", x = max(perc_differences$Mean_All_QC, na.rm = TRUE), y = loa_lower, 
+           label = "Lower LoA", hjust = 1, vjust = 1.5, color = "firebrick", size = 3) +
+  annotate("text", x = max(perc_differences$Mean_All_QC, na.rm = TRUE), y = mean_perc_diff, 
+           label = "Mean", hjust = 1, vjust = 1.5, color = "gray30", size = 3) +
+  annotate("rect", xmin = min(perc_differences$Mean_All_QC, na.rm = TRUE), 
+           xmax = min(perc_differences$Mean_All_QC, na.rm = TRUE) + diff(range(perc_differences$Mean_All_QC, na.rm = TRUE))/4,
+           ymin = max(perc_differences$Perc_Difference, na.rm = TRUE) - diff(range(perc_differences$Perc_Difference, na.rm = TRUE))/10, 
+           ymax = max(perc_differences$Perc_Difference, na.rm = TRUE),
+           alpha = 0.2, fill = "white", color = "black") +
+  annotate("text", x = min(perc_differences$Mean_All_QC, na.rm = TRUE) + diff(range(perc_differences$Mean_All_QC, na.rm = TRUE))/8, 
+           y = max(perc_differences$Perc_Difference, na.rm = TRUE) - diff(range(perc_differences$Perc_Difference, na.rm = TRUE))/20,
+           label = annotation_text, hjust = 0.5, vjust = 0.5, size = 3.5, color = "black") +
+  scale_color_viridis(discrete = TRUE, option = "D") +
+  labs(title = 'Normalized Percentage Differences from the Mean Across QC Samples (Positive Mode)',
+       subtitle = 'Analysis of variance in molecular measurements',
+       x = 'Log-Transformed Mean of All QC Samples',
+       y = 'Percentage Difference from Mean (%)',
+       color = 'QC Sample') +
+  theme_minimal(base_size = 12) +
+  theme(
+    plot.title = element_text(face = "bold", size = 14),
+    plot.subtitle = element_text(size = 12, color = "gray50"),
+    axis.title = element_text(face = "bold"),
+    legend.position = "bottom",
+    legend.title = element_text(face = "bold"),
+    panel.grid.major = element_line(color = "gray90"),
+    panel.grid.minor = element_line(color = "gray95")
+  ) +
+  scale_x_continuous(expand = c(0.02, 0)) +
+  scale_y_continuous(expand = c(0.02, 0)) +
+  coord_cartesian(clip = "off")
+
+# Save the plot with high resolution
+ggsave("QC_percentage_differences_plot_with_threshold_neg.pdf", width = 12, height = 9, dpi = 300)
+```
+
+## Retention time Coefficent of Variation Check
+
+```{r}
+# Load necessary libraries
+library(ggplot2)
+library(viridis)
+library(dplyr)
+
+# Load the data
+data <- read.csv("POOLQC-POS.csv")
+
+# Convert Cv Best Retention Time to numeric (removing the % sign)
+data$Cv.Best.Retention.Time <- as.numeric(sub("%", "", data$Cv.Best.Retention.Time))
+
+# Create the enhanced box plot
+ggplot(data, aes(x = reorder(Molecule.List, Cv.Best.Retention.Time, FUN = median), y = Cv.Best.Retention.Time)) +
+  geom_boxplot(aes(fill = Molecule.List), outlier.shape = NA, width = 0.7, alpha = 0.8) +
+  geom_jitter(width = 0.2, size = 0.7, alpha = 0.5) +
+  labs(title = "Distribution of Coefficient of Variation (Cv) of Retention Time",
+       x = "Lipid Class",
+       y = "Cv Best Retention Time (%)") +
+  theme_minimal(base_size = 14) +
+  theme(
+    axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1),
+    plot.title = element_text(hjust = 0.5, face = "bold", size = 16),
+    axis.title = element_text(face = "bold"),
+    legend.position = "none",
+    panel.grid.major = element_line(color = "grey90"),
+    panel.grid.minor = element_line(color = "grey95"),
+    panel.border = element_rect(color = "black", fill = NA, size = 0.5)
+  ) +
+  scale_fill_viridis(discrete = TRUE, option = "D") +
+  scale_y_continuous(expand = expansion(mult = c(0.05, 0.1))) +
+  stat_summary(fun.data = mean_se, geom = "errorbar", width = 0.2, color = "black") +
+  coord_cartesian(clip = "off")
+
+# Save the plot
+ggsave("retention_time_cv_distribution.pdf", width = 10, height = 7, dpi = 300)
+```
+
+## Histogram of Retention time distribution
+
+```{r}
+# Load necessary libraries
+library(ggplot2)
+library(car) # For Q-Q plot
+
+# Load the data
+data <- read.csv("POOLQC-POS.csv")
+
+# Extract the 'Mean Best Retention Time' column
+retention_times <- data$Mean.Best.Retention.Time
+
+# Histogram for retention times
+ggplot(data, aes(x = retention_times)) +
+  geom_histogram(binwidth = 0.1, fill = "blue", color = "black", alpha = 0.7) +
+  labs(title = "Histogram of Mean Best Retention Times",
+       x = "Mean Best Retention Time (minutes)",
+       y = "Frequency") +
+  theme_minimal(base_size = 15) +
+  theme(plot.title = element_text(hjust = 0.5, face = "bold"),
+        axis.title = element_text(face = "bold"))
+```
+## Q-Q plot to check normal distribution of retention-time
+```{r}
+# Q-Q plot for retention times
+qqPlot(retention_times, main = "Q-Q Plot of Mean Best Retention Times",
+       ylab = "Sample Quantiles", xlab = "Theoretical Quantiles",
+       envelope = 0.95, col.lines = "red", pch = 16)
+```
