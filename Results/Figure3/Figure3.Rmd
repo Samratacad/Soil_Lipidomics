@@ -1,0 +1,234 @@
+---
+title: "Figure1"
+author: "Rahul Samrat"
+date: "2025-03-17"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Load libraries
+
+```{r}
+library(ggplot2)
+library(dplyr)
+library(tidyr)
+library(readxl)
+library(forcats)
+library(RColorBrewer)
+library(reshape2)
+```
+## Load the data
+
+```{r}
+file_path <- "Figure1-data.xlsx"  # Update this with the actual file path
+df <- read_excel(file_path)
+
+```
+## Prepare the data for plotting Stacked bar plot
+
+```{r}
+subclass_counts <- df %>%
+  count(Class, Subclass) %>%
+  arrange(Class, desc(n))
+
+# Summarize subclass counts
+total_subclass_counts <- subclass_counts %>%
+  group_by(Class, Subclass) %>%
+  summarise(TotalCount = sum(n)) %>%
+  arrange(Class, desc(TotalCount))
+
+# Create custom labels for the legend with Class and Subclass
+total_subclass_counts <- total_subclass_counts %>%
+  mutate(Label = paste(Class, "-", Subclass, "(", TotalCount, ")", sep = ""))
+
+# Remove duplicates
+total_subclass_counts <- total_subclass_counts[!duplicated(total_subclass_counts$Label), ]
+
+# Convert to wide format for plotting
+sorted_subclass_counts <- subclass_counts %>%
+  pivot_wider(names_from = Subclass, values_from = n, values_fill = list(n = 0))
+
+# Convert to long format for ggplot
+df_long <- sorted_subclass_counts %>%
+  pivot_longer(-Class, names_to = "Subclass", values_to = "Count")
+
+# Ensure that Subclass is a factor and ordered by Class and Subclass within Class
+df_long$Subclass <- factor(df_long$Subclass, levels = unique(total_subclass_counts$Subclass))
+df_long$Class <- factor(df_long$Class, levels = unique(total_subclass_counts$Class))
+
+# Generate a color palette with enough colors for the unique subclasses
+n_colors <- length(unique(df_long$Subclass))
+colors <- brewer.pal(n = min(n_colors, 12), name = "Paired")
+if (n_colors > 12) {
+  colors <- colorRampPalette(colors)(n_colors)
+}
+```
+
+```{r}
+
+p <- ggplot(df_long, aes(x = Class, y = Count, fill = Subclass)) +
+  geom_bar(stat = "identity", color = "black") +
+  labs(title = "Stacked Bar Plot of Lipid Class",
+       x = "Class", y = "Count") +
+  theme_minimal() +
+  theme(
+    plot.title = element_text(size = 14, face = "bold"),
+    axis.title.x = element_text(size = 12, face = "bold"),
+    axis.title.y = element_text(size = 12, face = "bold"),
+    axis.text.x = element_text(angle = 0, hjust = 1),
+    panel.grid.major = element_blank(), 
+    panel.grid.minor = element_blank(),
+    legend.position = "bottom",
+    legend.title = element_text(size = 10),
+    legend.text = element_text(size = 8),
+    legend.box = "vertical"
+  ) +
+  guides(fill = guide_legend(title = "Subclass", ncol = 5, label.theme = element_text(size = 9))) +
+  scale_fill_manual(values = setNames(colors, unique(df_long$Subclass)),
+                    labels = setNames(total_subclass_counts$Label, total_subclass_counts$Subclass))
+# Save the plot as an SVG file
+ggsave("Fig3a-stacked_bar_plot.svg", plot = p, width = 12, height = 11.69, units = "in")
+print(p)
+```
+## Lipid Annotation Comparision Library-Search v/s Prediction-based approach
+
+```{r}
+# Load data
+data <- read_excel("Figure1-data.xlsx", sheet = "Sheet1")
+
+# Indicate presence or absence
+data$Library_search <- ifelse(!is.na(data$LipidSearch), 1, 0)
+data$Prediction_based <- ifelse(!is.na(data$SiriusID), 1, 0)
+
+# Summarize by 'Class'
+summarized_data <- aggregate(cbind(Library_search = Library_search, Prediction_based = Prediction_based) ~ Class, data, sum)
+
+# Melt data for plotting
+melted_data <- reshape2::melt(summarized_data, id.vars = 'Class', variable.name = 'Method', value.name = 'Count')
+
+# Colors matching previous Venn diagram
+colors <- c("Library_search" = "blue", "Prediction_based" = "red")
+
+# Create the plot
+p <- ggplot(melted_data, aes(x = Class, y = Count, fill = Method)) +
+  geom_bar(stat = "identity", position = position_dodge(0.7), width = 0.7, color = "black") +
+  geom_text(aes(label = Count), position = position_dodge(0.7), vjust = -0.5, size = 4) +
+  scale_fill_manual(values = colors, labels = c("Library-search", "Prediction-based")) +
+  labs(title = "Number of Identifications by Lipid Class",
+       x = "Lipid Class",
+       y = "Number of Identifications",
+       fill = "Identification Method") +
+  theme_minimal(base_size = 14) +
+  theme(
+    plot.title = element_text(face = "bold", hjust = 0.5, size = 16),
+    axis.text.x = element_text(angle = 45, hjust = 1, size = 12),
+    axis.text.y = element_text(size = 12),
+    legend.position = "top",
+    legend.title = element_text(face = "bold"),
+    panel.grid.major = element_line(color = "gray90"),
+    panel.grid.minor = element_blank()
+  ) +
+  geom_text(aes(label = Count), vjust = -0.3, position = position_dodge(0.7), size = 4)
+
+# Save as SVG
+ggsave("Fig-3b.svg", plot = p, device = "svg")
+print(p)
+
+```
+## Overlap of lipid identifications: Lipidsearch vs SIRIUS id
+```{r}
+library(readxl)
+library(VennDiagram)
+library(grid)
+library(ggplot2)
+
+# Read data
+file_path <- "Figure1-data.xlsx"
+data <- read_excel(file_path, sheet = "Sheet1")
+
+# Filter data
+lipidsearch_positive <- na.omit(as.character(data$LipidSearch[data$Mode == "Positive"]))
+lipidsearch_negative <- na.omit(as.character(data$LipidSearch[data$Mode == "Negative"]))
+siriusid_positive <- na.omit(as.character(data$SiriusID[data$Mode == "Positive"]))
+siriusid_negative <- na.omit(as.character(data$SiriusID[data$Mode == "Negative"]))
+
+# Combine sets
+lipidsearch_combined <- unique(c(lipidsearch_positive, lipidsearch_negative))
+siriusid_combined <- unique(c(siriusid_positive, siriusid_negative))
+
+# Calculate unique and overlap regions
+unique_lipidsearch <- setdiff(lipidsearch_combined, siriusid_combined)
+unique_siriusid <- setdiff(siriusid_combined, lipidsearch_combined)
+overlap <- intersect(lipidsearch_combined, siriusid_combined)
+
+overlap_positive <- intersect(lipidsearch_positive, siriusid_positive)
+overlap_negative <- intersect(lipidsearch_negative, siriusid_negative)
+
+# Count elements
+unique_lipidsearch_count <- length(unique_lipidsearch)
+unique_siriusid_count <- length(unique_siriusid)
+overlap_count <- length(overlap)
+
+lipidsearch_positive_count <- length(lipidsearch_positive)
+lipidsearch_negative_count <- length(lipidsearch_negative)
+siriusid_positive_count <- length(siriusid_positive)
+siriusid_negative_count <- length(siriusid_negative)
+overlap_positive_count <- length(overlap_positive)
+overlap_negative_count <- length(overlap_negative)
+
+# Create Venn diagram
+venn.plot <- draw.pairwise.venn(
+  area1 = length(siriusid_combined),
+  area2 = length(lipidsearch_combined),
+  cross.area = length(overlap),
+  category = c("Prediction-based", "Library-search"),
+  fill = c("#457B9D", "#E63946"),
+  alpha = c(0.6, 0.6),
+  lwd = 2,
+  cat.cex = 1.5,
+  cat.fontface = "bold",
+  fontface = "bold",
+  cex = 1.3
+)
+
+# Function to add annotations
+add_annotations <- function() {
+  grid.text(
+    paste0(unique_siriusid_count, "\n(P: ", siriusid_positive_count,
+           ", N: ", siriusid_negative_count, ")"),
+    x = 0.25, y = 0.7, gp = gpar(col = "black", fontsize = 12)
+  )
+  grid.text(
+    paste0(unique_lipidsearch_count, "\n(P: ", lipidsearch_positive_count,
+           ", N: ", lipidsearch_negative_count, ")"),
+    x = 0.75, y = 0.7, gp = gpar(col = "black", fontsize = 12)
+  )
+  grid.text(
+    paste0(overlap_count, "\n(P: ", overlap_positive_count,
+           ", N: ", overlap_negative_count, ")"),
+    x = 0.5, y = 0.5, gp = gpar(col = "black", fontsize = 12)
+  )
+  grid.text(
+    "Overlap of Lipid Identifications: SiriusID vs. LipidSearch",
+    x = 0.5, y = 0.95, gp = gpar(fontface = "bold", fontsize = 14)
+  )
+}
+
+# Save as high-resolution SVG
+svg("Fig-3c_venn_diagram_high_quality.svg", width = 8, height = 6)
+grid.newpage()
+grid.draw(venn.plot)
+add_annotations()
+dev.off()
+
+# Display in R
+grid.newpage()
+grid.draw(venn.plot)
+add_annotations()
+
+```
+
+

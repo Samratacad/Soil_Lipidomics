@@ -66,33 +66,48 @@ graph TD
 Here you can find the codes, generated figures, and datafile used for figures in the respective folder
 
 ### Main Figures
-- Fig1.[Lipid annotation using Library search and Prediction based approach](Results/Figure1/Figure1.ipynb)
-- Fig2.[PCA and Interaction plot](Results/Figure2/Figure2.ipynb)
-- Fig3.[FDR Hiararchical clustering Heatmap](Results/Figure3/Figure3.ipynb)
-- Fig4.[Lipid Specificity & Shannon entropy](Results/Figure4/Figure4.ipynb)
-- Fig5.[Class specific lipid concentration across treatment](Results/Figure5/figure5.ipynb)
+- Fig1.[Integrated soil lipidomics worklfow](Results/Figure1/soil-lipidomics-workflow.svg)
+- Fig2.[Retention time distribution of lipid classes from fungal lipidome analysis](Results/Figure2/FIGURE-2.svg)
+- Fig3.[Comprehensive characterization of soil lipidome in climgrass experiment](Results/Figure3/Figure3.html)
+- Fig4.[Predicitive modeling of lipid ionization efficiency](Results/Figure4/Final-plot-ionization-efficiency.ipynb)
+- Fig5.[NMDS ordination of lipidomics profiles across organism groups](Results/Figure5/figure5.ipynb)
+- Fig6. [Influence of climate and drought conditions on soil lipid composition and diversity](Results/Figure6)
+- Fig7. [Heatmap of fatty acid profiles in significant lipid subclasses under climate and drought treatments](Results/Figure7)
+
 
 ### Supplementary files
 - [Info](supplementary/Table-S1.docx)
 
 ### Supplementary Figures
 
-1. **Standards**
-- S1.[Calibration curve Standards](Results/Calibration-curves/Calibration-curve.ipynb)
-- S2.[MS/MS spectra Standards](Results/Validation-of-current-lipidomics-workflow/LipidStandards/mass-spec-standards.ipynb)
-- S3.[Table Lipid Standard LOQ/LOQ](supplementary/calibration_table.pdf)
-2. **POOL Quality Control**
-- S4.[Quality control POOL QC](supplementary/QC_percentage_differences_plot_with_threshold_neg.pdf)
-- S5.[QC figure Classwise]
-- S6.[Retention time CV](supplementary/retention_time_cv_distribution.pdf)
-3. **External QC NIST SRM**
-- S6.[NIST SRM 1950 LipidQC](supplementary/Soil_lipidomcis_NISTSRM1950.png)
-4. **Lipid Recovery**
-- S7.[Recovery percentage internal standards]
-5. **Hierarchical clustering of samples detailed**
-- S8. [Significant Compounds](supplementary/significant_compounds_heatmap.pdf)
+- S1.[QC consistency: Bland-Altman analysis of ionization modes]()
+- S2.[Lipid molecular networking using MS/MS and retention data](Results/Validation-of-current-lipidomics-workflow/LipidStandards/mass-spec-standards.ipynb)
+- S3.[Hierarchical network of significant lipid in ClimGrass](supplementary/calibration_table.pdf)
+- S4.[Hierarchical clustering heatmap of FDR-signficant lipid compound across treatments](supplementary/QC_percentage_differences_plot_with_threshold_neg.pdf)
+- S5.[Total lipid concentration across climate and drought treatments]()
+- S6.[Lipid class composition under ambient and future climate with or without drought](supplementary/retention_time_cv_distribution.pdf)
+- S7.[Subclass-level variation in glycerolipids across climate and drought treatments](supplementary/Soil_lipidomcis_NISTSRM1950.png)
+- S8.[Glycerophospholipid subclass changes across climate and drought treatments]()
+- S9. [Sphingolipid subclass variation under climate and drought treatments](supplementary/significant_compounds_heatmap.pdf)
+- S10. [Accuracy assessment of SRM 1950 metabolites in frozen human plasma using postive and negative ESI modes]()
+- S11. [Quality control trendlines and retention time variability for soil lipid classes]()
+- S12. [Lipid specificity across treatments]()
+- S13. [Retention time distribution of lipid classes in ClimGrass samples]()
 
-## Detailed Steps
+### Supplementary Tables
+- S1. [Reagents and standards]()
+- S2. [Lipid nomenclature of different lipid classes in this study ]()
+- S3. [Microbial cultivation and preperation method]()
+- S4. [UHPLC gradient]()
+- S5. [HRMS/MS parameters for Q Exactive]()
+- S6. [QA ILS]()
+- S7. [Measurement accuracy summary compared against SRM 1950]()
+- S8. [Comprehensive table of annotated compounds using SIRIUS 5, Lipidsearch 5, GNPS]()
+- S9. [LOD and LOQ for best molecule each lipid subclass]()
+- S10. [PaDEL molecular descriptors]()
+- S11. [Top features in stepwise-regression model for each adduct type]()
+- S12. [LOD & LOQ of lipid standards for each lipid subclass in all adduct formation]()
+- S13. [Comparision of lipid extration recoveries between soil samples and NIST 1950 plasma]()
 
 ### 1. Sample Preparation
 
