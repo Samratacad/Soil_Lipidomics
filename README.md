@@ -1,65 +1,6 @@
-# Soil Sample Analysis Workflow
+# High-resolution lipidomics for decoding soil biome: Improved lipid annotation, quantitation, and response to climate stress
 
-This README describes the workflow for analyzing soil samples using the protocol provided in the paper.
-
-## Workflow Diagram
-
-The following diagram represents the workflow used for Lipidomics analysis in ClimGrass Experiment. Click on any box to view more detailed information about that process.
-
-
-```mermaid
-graph TD
-    A[Freeze dried soil samples 3x per treatment] --> C[Total Lipid Extraction Batch]
-    B[Class specific heavy isotope standards 13 classes, 10ng/compound] --> C
-    D[NIST SRM 1950 Plasma 50ul] --> C
-    C --> E[Sample Worklist spike External Standards, pool QC Samples]
-    E --> F[LC Orbitrap MS/MS]
-    F --> G[Untargeted analysis]
-    G --> H[Identification]
-    G --> I[Quantification]
-
-    subgraph QC [Quality Control]
-        style QC fill:#e6f3ff,stroke:#4da6ff,stroke-width:2px
-        J[Quality Control]
-        J --> L1[LipidQC]
-        click L1 "#lipidqc"
-        J --> L2[POOL QC]
-        click L2 "#pool-qc"
-        J --> L3[External Standard Calibration]
-        click L3 "#external-standard-calibration"
-        J --> L4[Lipid Recovery using Internal Standard]
-        click L4 "#lipid-recovery-using-internal-standard"
-    end
-
-    subgraph ID [Identification Pathway]
-        style ID fill:#e6ffe6,stroke:#66cc66,stroke-width:2px
-        H --> M1[Library search LipidSearch 5]
-        click M1 "https://github.com/Samratacad/Soil_Lipidomics/blob/main/methods/Dataprocessing/lipidsearch5/lipidsearch5-identification.pdf"
-        H --> M2[In Silico MS/MS prediction SIRIUS 5]
-        click M2 "https://github.com/Samratacad/Soil_Lipidomics/blob/main/methods/Dataprocessing/sirius5/SIRIUS5predictionSettings.pdf"
-        H --> M3[Online Search GNPS platform]
-        click M3 "#online-search-gnps-platform"
-        H --> M4[FBMN GNPS platform]
-        click M4 "#fbmn-gnps-platform"
-    end
-
-    subgraph QUANT [Quantification Pathway]
-        style QUANT fill:#fff0e6,stroke:#ffaa80,stroke-width:2px
-        I --> K1[Compound Classification using Class specific standards]
-        click K1 "#compound-classification-using-class-specific-standards"
-        I --> K2[Compound Quantification using IS Model]
-        click K2 "#compound-quantification-using-is-model"
-    end
-```
-
-## Workflow Overview
-
-1. Sample Preparation
-2. Lipid Extraction
-3. Chromatographic & mass spectrometry Analysis
-4. Data Processing
-5. Quality Control
-6. Compound Identification and Quantification
+This README describes the workflow for analyzing soil samples using the protocol provided in the paper. It also include relevant data, rnotebook, jupyternotebook files, scripts used to generate figures and tables for the published article.
 
 
 ## Results
@@ -108,6 +49,20 @@ Here you can find the codes, generated figures, and datafile used for figures in
 - S11. [Top features in stepwise-regression model for each adduct type]()
 - S12. [LOD & LOQ of lipid standards for each lipid subclass in all adduct formation]()
 - S13. [Comparision of lipid extration recoveries between soil samples and NIST 1950 plasma]()
+
+
+
+
+## Workflow Overview
+
+1. Sample Preparation
+2. Lipid Extraction
+3. Chromatographic & mass spectrometry Analysis
+4. Data Processing
+5. Quality Control
+6. Compound Identification and Quantification
+
+
 
 ### 1. Sample Preparation
 
