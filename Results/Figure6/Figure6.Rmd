@@ -1,0 +1,322 @@
+---
+title: "Figure6"
+author: "Rahul Samrat"
+date: "2025-03-17"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Figure 6a. PCA showing lipid profile different in Climgrass treatments
+
+```{r}
+# Load necessary libraries
+library(readr)
+library(dplyr)
+library(ggplot2)
+library(FactoMineR)
+library(vegan)
+library(ggrepel)
+library(tibble)
+```
+
+```{r}
+# Load the data
+metadata <- read_csv('Metadata.csv')
+normalized_data <- read_csv('normalized_data.csv')
+
+# Standardize sample names to avoid mismatches
+metadata$Sample <- as.character(trimws(metadata$Sample))
+colnames(normalized_data) <- as.character(trimws(colnames(normalized_data)))
+
+# Transpose normalized data and merge with metadata
+normalized_data_t <- as.data.frame(t(normalized_data[-1]))
+colnames(normalized_data_t) <- normalized_data$GlobalID
+rownames(normalized_data_t) <- colnames(normalized_data)[-1]
+
+# Prepare metadata for merging
+metadata <- metadata %>% column_to_rownames(var = "Sample")
+
+# Merge data on sample names
+merged_data <- merge(metadata, normalized_data_t, by = "row.names")
+rownames(merged_data) <- merged_data$Row.names
+merged_data <- merged_data[-1]
+
+# Extract dependent and independent variables
+independent_vars <- merged_data[, 1:2]
+dependent_vars <- merged_data[, -c(1:2)]
+
+# Check for negative values in the data
+if (any(dependent_vars < 0)) {
+  print("Negative values found in dependent variables. Correcting data...")
+  dependent_vars[dependent_vars < 0] <- 0
+}
+
+```
+
+# Recompute the distance matrix with Bray-Curtis method
+
+```{r}
+distance_matrix <- vegdist(dependent_vars, method = "bray")
+```
+
+# Perform PCA
+
+```{r}
+pca_result <- PCA(dependent_vars, graph = FALSE)
+pca_data <- as.data.frame(pca_result$ind$coord[, 1:2])
+colnames(pca_data) <- c("PC1", "PC2")
+pca_data <- cbind(pca_data, independent_vars)
+
+# Create a combined group factor
+pca_data$Combined_Group <- ifelse(pca_data$Type2 == "Drought", "Drought", "No_Drought")
+
+# Compute Bray-Curtis distance matrix
+distance_matrix <- vegdist(dependent_vars, method = "bray")
+```
+
+# Perform PERMANOVA
+
+```{r}
+result <- adonis2(distance_matrix ~ Combined_Group, data = pca_data, method = "bray", permutations = 999)
+
+permanova_result <- adonis2(distance_matrix ~ Combined_Group, data = pca_data, permutations = 9999)
+permanova_p <- permanova_result$`Pr(>F)`[1]
+```
+
+# Plot PCA with convex hulls and PERMANOVA annotation
+
+```{r}
+# Define color and shape mappings
+colors <- c("Ambient" = "#0072B2", "Future" = "#D55E00")
+shapes <- c("Drought" = 16, "No_drought" = 17)
+hull_colors <- c("Drought" = "#E69F00", "No_Drought" = "#56B4E9")
+
+
+pca_plot <- ggplot(pca_data, aes(x = PC1, y = PC2, color = Type1, shape = Type2)) +
+  geom_point(size = 4, alpha = 0.8) +
+  scale_color_manual(values = colors, name = "Climate Scenario") +
+  scale_shape_manual(values = shapes, name = "Water Condition") +
+  theme_minimal(base_size = 14) +
+  theme(
+    panel.grid.minor = element_blank(),
+    panel.grid.major = element_line(color = "gray90"),
+    legend.position = "right",
+    legend.box = "vertical",
+    legend.key.size = unit(1, "cm"),
+    legend.text = element_text(size = 12),
+    legend.title = element_text(size = 14, face = "bold"),
+    plot.title = element_text(hjust = 0.5, face = "bold", size = 16),
+    axis.title = element_text(face = "bold", size = 14),
+    axis.text = element_text(size = 12)
+  ) +
+  labs(
+    title = "PCA of Soil Lipid Profiles",
+    x = paste0("PC1 (", round(pca_result$eig[1, 2], 1), "%)"),
+    y = paste0("PC2 (", round(pca_result$eig[2, 2], 1), "%)")
+  ) +
+  geom_hline(yintercept = 0, linetype = "dashed", color = "gray50") +
+  geom_vline(xintercept = 0, linetype = "dashed", color = "gray50") +
+  coord_fixed(ratio = 1)
+
+# Add convex hulls
+for (group in unique(pca_data$Combined_Group)) {
+  group_data <- pca_data[pca_data$Combined_Group == group, ]
+  if (nrow(group_data) > 2) {
+    hull_indices <- chull(group_data$PC1, group_data$PC2)
+    hull_data <- group_data[hull_indices, ]
+    pca_plot <- pca_plot + 
+      geom_polygon(data = hull_data, aes(x = PC1, y = PC2, fill = Combined_Group),
+                   alpha = 0.2, color = hull_colors[group], show.legend = FALSE)
+  }
+}
+
+# Add PERMANOVA annotation
+pca_plot <- pca_plot + 
+  annotate("text", x = Inf, y = Inf, label = paste0("PERMANOVA\np = ", signif(permanova_p, 2)), 
+           hjust = 1.1, vjust = 1.1, size = 5, 
+           fontface = "bold", color = "black", 
+           box.padding = unit(0.35, "lines"))
+
+# Save and display the plot
+ggsave("publication_quality_pca_plot.pdf", plot = pca_plot, width = 10, height = 8, dpi = 300)
+print(pca_plot)
+```
+
+# Figure 6b. Shannon entropy (lipid diversity) across climgrass treatments
+
+## Calculating concentration of each lipid with different treatment
+
+```{r}
+# Load necessary libraries
+library(readxl)
+library(dplyr)
+library(tidyr)
+library(ggplot2)
+library(viridis)  # For a colorblind-friendly palette
+library(ggthemes) # For additional themes
+library(extrafont) # For using custom fonts (you may need to install this)
+library(readxl)
+library(dplyr)
+library(writexl)
+library(tidyverse)
+library(ggrepel)
+library(scales)
+library(gridExtra)
+
+
+# Load the Excel file
+file_path <- 'Fig5-ALL-concentration-updated.xlsx'
+df <- read_excel(file_path, sheet = 'SIRIUS-STD')
+
+# Sample data with combined treatment type
+sample_data <- data.frame(
+  Sample = c(19, 22, 36, 28, 44, 49, 35, 40, 52, 27, 43, 48, 50),
+  Type1 = c("Ambient", "Ambient", "Ambient", "Ambient", "Ambient", "Ambient", "Future", "Future", "Future", "Future", "Future", "Future", "Future"),
+  Type2 = c("No_drought", "No_drought", "No_drought", "Drought", "Drought", "Drought", "No_drought", "No_drought", "No_drought", "Drought", "Drought", "Drought", "Drought"),
+  Weight = c(2.054, 1.965, 2.063, 2.048, 2.063, 2.082, 2.065, 2.032, 2.033, 2.071, 2.028, 2.027, 0.178)
+)
+sample_data$Combined_Treatment <- paste(sample_data$Type1, sample_data$Type2, sep = "_")
+
+# Mapping sample numbers to treatment columns
+sample_to_column <- list(
+  `19` = 'Ambient_No_drought_Sample_19',
+  `22` = 'Ambient_No_drought_Sample_22',
+  `36` = 'Ambient_No_drought_Sample_36',
+  `28` = 'Ambient_Drought_Sample_28',
+  `44` = 'Ambient_Drought_Sample_44',
+  `49` = 'Ambient_Drought_Sample_49',
+  `35` = 'Future_No_drought_Sample_35',
+  `40` = 'Future_No_drought_Sample_40',
+  `52` = 'Future_No_drought_Sample_52',
+  `27` = 'Future_Drought_Sample_27',
+  `43` = 'Future_Drought_Sample_43',
+  `48` = 'Future_Drought_Sample_48'
+)
+
+# Filter out rows where the corresponding LOQ column value is not 1 (good value)
+concentration_cols <- grep('Concentration$', names(df), value = TRUE)
+loq_cols <- grep('Concentration > LOQ$', names(df), value = TRUE)
+for (loq_col in loq_cols) {
+  df <- df %>% filter(df[[loq_col]] == 1)
+}
+
+# Creating a new dataframe to hold the rearranged columns
+filtered_df <- df %>% select(GlobalID, `Molecule List`, LipidMolecule)
+
+# Renaming the columns based on combined treatment type and sample number
+for (i in 1:nrow(sample_data)) {
+  sample <- sample_data$Sample[i]
+  treatment_col <- paste(sample_data$Combined_Treatment[i], 'Sample', sample, sep = "_")
+  sample_col <- paste(sample, 'Sum Total Area Concentration', sep = " ")
+  if (sample_col %in% names(df)) {
+    filtered_df[[treatment_col]] <- df[[sample_col]]
+  }
+}
+
+# Creating the new dataframe with the desired format including GlobalID
+new_format_data_with_id <- data.frame(
+  GlobalID = integer(),
+  Molecule.List = character(),
+  LipidMolecule = character(),
+  Sample = integer(),
+  Concentration = numeric(),
+  Treatment = character(),
+  stringsAsFactors = FALSE
+)
+
+# Populating the new dataframe with GlobalID
+for (i in 1:length(sample_to_column)) {
+  sample <- as.numeric(names(sample_to_column)[i])
+  column <- sample_to_column[[i]]
+  treatment_type <- strsplit(column, '_Sample_')[[1]][1]
+  for (j in 1:nrow(filtered_df)) {
+    new_format_data_with_id <- rbind(new_format_data_with_id, data.frame(
+      GlobalID = filtered_df$GlobalID[j],
+      Molecule.List = filtered_df$`Molecule List`[j],
+      LipidMolecule = filtered_df$LipidMolecule[j],
+      Sample = sample,
+      Concentration = filtered_df[[column]][j],
+      Treatment = treatment_type
+    ))
+  }
+}
+
+output_path <- "information-theory-indices1.xlsx"
+write_xlsx(new_format_data_with_id, output_path)
+
+# Display the final dataframe
+print(head(new_format_data_with_id))
+```
+
+# Calculation of Shannon entropy Hj
+
+```{r}
+# Load necessary libraries
+library(readxl)
+library(dplyr)
+library(ggplot2)
+
+# Load data
+file_path <- "information-theory-indices1.xlsx"
+data <- read_excel(file_path, sheet = "Sheet1")
+
+# Calculate relative frequency (P_ij)
+data <- data %>%
+  group_by(Sample) %>%
+  mutate(P_ij = Concentration / sum(Concentration)) %>%
+  ungroup()
+
+# Calculate Shannon entropy (H_j) per sample
+H_j <- data %>%
+  group_by(Sample) %>%
+  summarise(H_j = -sum(P_ij * log2(P_ij), na.rm = TRUE))
+
+# Merge with treatment information explicitly
+sample_treatments <- data %>% select(Sample, Treatment) %>% distinct()
+H_j <- left_join(H_j, sample_treatments, by = "Sample")
+
+# Ensure factor levels match the actual treatment labels
+H_j$Treatment <- factor(H_j$Treatment, 
+                        levels = c("Ambient_No_drought", "Ambient_Drought", "Future_No_drought", "Future_Drought"))
+
+# Perform one-way ANOVA safely after ensuring factors
+anova_result <- aov(H_j ~ Treatment, data = H_j)
+anova_summary <- summary(anova_result)
+anova_pvalue <- anova_summary[[1]][["Pr(>F)"]][1]
+
+# Define custom colors for treatments explicitly matching actual labels
+treatment_colors <- c("Ambient_No_drought" = "#A6CEE3",
+                      "Ambient_Drought" = "#FDBF6F",
+                      "Future_No_drought" = "#1F78B4",
+                      "Future_Drought" = "#E31A1C")
+
+# Plot with annotation
+shannon_plot <- ggplot(H_j, aes(x = Treatment, y = H_j, fill = Treatment)) +
+  geom_boxplot(alpha = 0.7, color = "black") +
+  geom_jitter(width = 0.15, size = 2, alpha = 0.6, color = "black") +
+  scale_fill_manual(values = treatment_colors) +
+  theme_minimal(base_size = 14) +
+  theme(
+    axis.text.x = element_text(angle = 45, hjust = 1),
+    plot.title = element_text(face = "bold", hjust = 0.5),
+    legend.position = "none"
+  ) +
+  labs(
+    title = "Shannon Entropy (Lipid Diversity) Across Treatments",
+    x = "Treatment",
+    y = "Shannon Entropy (H_j)"
+  ) +
+  annotate("text", Inf, Inf, 
+           label = paste0("ANOVA p-value = ", round(anova_pvalue, 3)),
+           hjust = 1.1, vjust = 1.5, size = 5, fontface = "bold", color = "black")
+
+# Display plot
+print(shannon_plot)
+
+# Save plot
+ggsave("shannon_entropy_anova_plot.png", plot = shannon_plot, width = 10, height = 7, dpi = 300)
+
+```
