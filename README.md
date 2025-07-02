@@ -7,13 +7,13 @@ This README describes the workflow for analyzing soil samples using the protocol
 Here you can find the codes, generated figures, and datafile used for figures in the respective folder
 
 ### Main Figures
-- Fig1.[Integrated soil lipidomics worklfow](Results/Figure1/soil-lipidomics-workflow.svg)
-- Fig2.[Retention time distribution of lipid classes from fungal lipidome analysis](Results/Figure2/FIGURE-2.svg)
-- Fig3.[Comprehensive characterization of soil lipidome in climgrass experiment](Results/Figure3/Figure3.html)
+- Fig1.[Integrated soil lipidomics worklfow](Results/Figure1)
+- Fig2.[Retention time distribution of lipid classes from fungal lipidome analysis](Results/Figure2)
+- Fig3.[Comprehensive characterization of soil lipidome in climgrass experiment](Results/Figure3)
 - Fig4.[Predicitive modeling of lipid ionization efficiency](Results/Figure4/Final-plot-ionization-efficiency.ipynb)
-- Fig5.[NMDS ordination of lipidomics profiles across organism groups](Results/Figure5/figure5.ipynb)
-- Fig6. [Influence of climate and drought conditions on soil lipid composition and diversity](Results/Figure6)
-- Fig7. [Heatmap of fatty acid profiles in significant lipid subclasses under climate and drought treatments](Results/Figure7)
+- Fig5.[NMDS ordination of lipidomics profiles across organism groups](Figure5/Figure-5-nmds-analysis.R)
+- Fig6. [Influence of climate and drought conditions on soil lipid composition and diversity](Results/Figure6/Figure6.Rmd)
+- Fig7. [Heatmap of fatty acid profiles in significant lipid subclasses under climate and drought treatments](Results/Figure7/heatmap-fatty-acid-only-ceramide.R)
 
 
 ### Supplementary files
@@ -21,19 +21,21 @@ Here you can find the codes, generated figures, and datafile used for figures in
 
 ### Supplementary Figures
 
-- S1.[QC consistency: Bland-Altman analysis of ionization modes]()
-- S2.[Lipid molecular networking using MS/MS and retention data](Results/Validation-of-current-lipidomics-workflow/LipidStandards/mass-spec-standards.ipynb)
-- S3.[Hierarchical network of significant lipid in ClimGrass](supplementary/calibration_table.pdf)
-- S4.[Hierarchical clustering heatmap of FDR-signficant lipid compound across treatments](supplementary/QC_percentage_differences_plot_with_threshold_neg.pdf)
-- S5.[Total lipid concentration across climate and drought treatments]()
-- S6.[Lipid class composition under ambient and future climate with or without drought](supplementary/retention_time_cv_distribution.pdf)
-- S7.[Subclass-level variation in glycerolipids across climate and drought treatments](supplementary/Soil_lipidomcis_NISTSRM1950.png)
-- S8.[Glycerophospholipid subclass changes across climate and drought treatments]()
-- S9. [Sphingolipid subclass variation under climate and drought treatments](supplementary/significant_compounds_heatmap.pdf)
-- S10. [Accuracy assessment of SRM 1950 metabolites in frozen human plasma using postive and negative ESI modes]()
-- S11. [Quality control trendlines and retention time variability for soil lipid classes]()
-- S12. [Lipid specificity across treatments]()
-- S13. [Retention time distribution of lipid classes in ClimGrass samples]()
+- S1.[Overview of the integrative lipidomics workflow]()
+- S2.[Quality Control Trendlines and Retention Time Variability for Soil Lipid Classes]()
+- S3.[QC Consistency: Bland–Altman analysis of ionization modes]()
+- S4.[Accuracy Assessment of SRM 1950 Metabolites in Frozen Human Plasma Using Positive (a) and Negative (b) ESI Modes]()
+- S5.[Lipid molecular networking using MS/MS and retention data]()
+- S6.[Hierarchical network of significant lipids in ClimGrass]()
+- S7.[Hierarchical clustering heatmap of FDR-significant lipid compounds across treatments]()
+- S8.[Total Lipid Concentration Across Climate and Drought Treatments]()
+- S9. [Lipid Class Composition Under Ambient and Future Climate With or Without Drought]()
+- S10. [Subclass‐Level Variation in Glycerolipids Across Climate and Drought Treatments]()
+- S11. [Glycerophospholipid Subclass Changes Across Climate and Drought Treatments]()
+- S12. [Sphingolipid Subclass Variation Under Climate and Drought Treatments]()
+- S13. [Subclass-specific response factors across adduct types]()
+- S14. [Lipid specificity across treatments]()
+- S15. [Retention time distribution of lipid classes in ClimGrass samples]()
 
 ### Supplementary Tables
 - S1. [Reagents and standards]()
